@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage{xparse}
+\usepackage{microtype}
+\usepackage{fullpage}
+\usepackage{enumerate}
+\usepackage{mathpazo}
+\usepackage{hyperref}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Favonia}
+\date{January 21 and 28, 2020}
+
+\NewDocumentCommand{\logicor}{m}{\vee}
+
+\begin{document}
+
+\maketitle
+
+\section{Principles of Type Theory}
+
+Type theory serves as a foundation of mathematics alternative to set theory. Although it is difficult to pin down a precise definition of type theory, we have pretty good ideas about what principles a type theory should follow. Here are two important principles:
+\begin{enumerate}
+  \item Type theory is about \textbf{abstractions.}
+
+    Type theory comes with built-in abstractions. For example, in many type theories with natural numbers, the number zero and the successor operator are primitive notions, not defined in terms of more ``basic'' notions; in contrast, all numbers and operators are encoded as sets in set theory. Type theory is arguably closer to how mathematicians actually work in practice: for example, a reasonable proof in number theory should not depend on how natural numbers are implemented, and type theory formally enforces such abstractions.
+
+    One may draw an analogy from Euclid's famous book Elements, which starts with abstract notions of points and lines without using the Cartesian coordinates. The Homotopy Type Theory, which we will introduce in this semester, can be seen as abstractions of topological spaces up to continuous deformations without using point topology.
+
+  \item Type theory is about \textbf{constructions.}
+
+    Another important feature of most type theories is to understand \emph{being true} as \emph{having a proof}. We pay close attention to how proofs are constructed. There are two consequences of this principle:
+    \begin{itemize}
+      \item Type theory works well for computer science. The types are specifications and proofs are programs. It is not surprising that almost every programming language employs some type system to classify its programs.
+
+      \item The global law of excluded middle (LEM) (which means, for any formula $A$, either $A$ or $\neg A$) no longer makes sense, because it is unreasonable to assume there is a procedure that can give either a proof or a refutation for any random $A$. The $A$ can be the Riemann Hypothesis. That said, for specific $A$, say, whether two natural numbers, we can prove either $A$ or $\neg A$ because the equality can be determined algorithmically. Moreover, the law of excluded middle is \emph{irrefutable} ($\neg \neg (A \logicor \neg A)$), which means while we cannot assert a global LEM, we cannot refute it either.\footnote{This is a difficult theorem that you should try to prove in Agda.}
+    \end{itemize}
+\end{enumerate}
+
+\section{How to Define a Type?}
+
+Since type theory is about abstractions, there will be many types capturing different abstractions. To define types, one should answer the following five questions:
+
+\begin{enumerate}
+  \item Formation: What are the types?
+  \item Introduction: What are the canonical ways to construct elements in the types?
+  \item Elimination: How to use an element of those types?
+  \item Computation: What will happen when you are using elements in canonical forms?
+  \item Uniqueness: Are all elements equal to some elements in canonical forms?
+\end{enumerate}
+
+\end{document}
