@@ -32,7 +32,7 @@ Type theory serves as a foundation of mathematics alternative to set theory. Alt
     \begin{itemize}
       \item Type theory works well for computer science. The types are specifications and proofs are programs. It is not surprising that almost every programming language employs some type system to classify its programs.
 
-      \item The global law of excluded middle (LEM) (which means, for any formula $A$, either $A$ or $\neg A$) no longer makes sense, because it is unreasonable to assume there is a procedure that can give either a proof or a refutation for any random $A$. The $A$ can be the Riemann Hypothesis. That said, for specific $A$, say, whether two natural numbers, we can prove either $A$ or $\neg A$ because the equality can be determined algorithmically. Moreover, the law of excluded middle is \emph{irrefutable} ($\neg \neg (A \logicor \neg A)$), which means while we cannot assert a global LEM, we cannot refute it either.\footnote{This is a difficult theorem that you should try to prove in Agda.}
+      \item The global law of excluded middle (LEM) (which means, for any formula $A$, either $A$ or $\neg A$) no longer makes sense, because it is unreasonable to assume there is a procedure that can give either a proof or a refutation for any random $A$. The $A$ can be the Riemann Hypothesis. That said, for specific $A$, say, whether two natural numbers are equal, we can either prove $A$ or refute $A$ because the equality can be determined algorithmically. On the other hand, we can show the law is \emph{irrefutable} ($\neg \neg (A \logicor \neg A)$), which means while we cannot prove a global LEM, we cannot refute it either.\footnote{This is a difficult theorem that you should try to prove in Agda.}
     \end{itemize}
 \end{enumerate}
 
