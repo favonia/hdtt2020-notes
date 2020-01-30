@@ -1,0 +1,52 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hdtt2020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Other Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{amsmath,amsthm,amssymb}
+\RequirePackage{microtype}
+\RequirePackage{xparse}
+\RequirePackage{mathpartir}
+\RequirePackage{ebproof}
+\RequirePackage{enumerate}
+\RequirePackage[usenames,svgnames]{xcolor}
+\RequirePackage{hyperref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start of the Content
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProcessOptions\relax
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorem-like environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem{lemma}{Lemma}[section]
+\newenvironment{hint}{\noindent{\bf (Hint)}}{}
+\newtheorem{thm}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{task}{Task}
+\newtheorem{bonus}{Bonus Task}
+\renewenvironment{proof}{\trivlist \item[\hskip \labelsep{\bf Proof:}]}{\hfill$\Box$ \endtrivlist}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros for Logic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NewDocumentCommand{\logicor}{}{\vee}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros for Type Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NewDocumentCommand{\ctx}{}{\Gamma}
+\NewDocumentCommand{\entails}{gg}{\IfValueTF{#2}{\IfValueTF{#1}{#1\vdash#2}{\vdash#1}}{\vdash}}
+
+\NewDocumentCommand{\postfixjudgment}{m}{%
+  \relax\ifnum\lastnodetype>0\mskip\medmuskip\fi
+  \textsf{\judgmentfont{#1}}%
+}
+\NewDocumentCommand{\istype}{g}{\IfValueTF{#1}{#1\postfixjudgment{type}}{\textsf{type}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The End
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endinput
