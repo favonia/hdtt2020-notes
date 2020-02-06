@@ -3,6 +3,7 @@
 \usepackage{newpxmath}
 \usepackage{newpxtext}
 
+\NewDocumentCommand{\TT}{}{\mathcal{T}}
 \NewDocumentCommand{\JJ}{}{\mathcal{J}}
 
 \title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
@@ -76,7 +77,7 @@ emphasizes that $\JJ$ holds with access to no variables.
 
 \subsection{Inference Rules}
 
-A type theory is specified by a collection of \emph{inference rules},
+A type theory is specified by a collection of \emph{(inference) rules},
 which represent all the valid reasoning steps in the theory.
 To start with, a type theory might have this rule:
 \[
@@ -119,6 +120,110 @@ We say a judgment $\JJ$ is \emph{derivable} if there is a complete derivation tr
 
 \section{Structural Rules}
 
+These rules are called \emph{structural rules} because they do not mention any connectives or type constructors.
+For example, we can force the type equality to be an equivalence relation:
+\begin{mathpar}
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\eqtype{A}{B}}
+      \infer1{\eqtype{B}{A}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\istype{A}}
+      \infer1{\eqtype{A}{A}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\eqtype{A}{B}}
+      \hypo{\eqtype{B}{C}}
+      \infer2{\eqtype{A}{C}}
+    \end{prooftree}
+  \end{varwidth}
+\end{mathpar}
+Note that the rule
+\[
+  \begin{prooftree}
+    \hypo{\eqtype{A}{B}}
+    \infer1{\eqtype{B}{A}}
+  \end{prooftree}
+\]
+actually means
+\[
+  \begin{prooftree}
+    \hypo{\eqtype{\Gamma}{A}{B}}
+    \infer1{\eqtype{\Gamma}{B}{A}}
+  \end{prooftree}
+\]
+It is very common to omit ambient contexts $\Gamma$ that do not interact with other parts of a rule.
+
+It is encouraged to read \citetitle[Appendix A.2]{hott-as:book} to see
+what structural rules a complete type theory might have.
+One of the most important rules is the \emph{variable rule},
+which enables us to use the hypotheses in the context:
+\[
+  \begin{prooftree}
+    \hypo{x{:}A \in \ctx}
+    \infer1[(variable)]{\oftype{\ctx}{x}{A}}
+  \end{prooftree}
+\]
+
+In addition to the variable rule, there are several rules that are common in a type theory:
+\begin{mathpar}
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\entails{\ctx}{\JJ}}
+      \infer1[(weakening)]{\entails{\ctx,x{:}A}{\JJ}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\entails{\ctx,x{:}A,y{:}A,\Delta}{\JJ}}
+      \infer1[(contraction)]{\entails{\ctx,z{:}A,\Delta}{\JJ\subst{z,z}{x,y}}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\entails{\ctx,x{:}A,y{:}B,\Delta}{\JJ}}
+      \hypo{(B\text{~does not depend on~}$x$)}
+      \infer2[(exchange)]{\entails{\ctx,y{:}B,x{:}A,\Delta}{\JJ}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\entails{\ctx,x{:}A,\Delta}{\JJ}}
+      \hypo{\oftype{\ctx}{M}{A}}
+      \infer2[(substitution)]{\entails{\ctx,\Delta\subst{M}{x}}{\JJ\subst{M}{x}}}
+    \end{prooftree}
+  \end{varwidth}
+\end{mathpar}
+These rules are either part of the definition of a type theory
+or are \emph{admissible}, meaning that the theory is carefully arranged so that
+the rules are are \emph{provable} in the following sense.
+\begin{definition}[admissible rules]
+  An inference rule
+  \[
+    \begin{prooftree}
+      \hypo{\JJ_1}
+      \hypo{\JJ_2}
+      \hypo{\cdots}
+      \hypo{\JJ_n}
+      \infer4{\JJ}
+    \end{prooftree}
+  \]
+  in a theory $\TT$ if
+  whenever there are derivations of the judgments $\JJ_1$, $\JJ_2$, \ldots, $\JJ_n$,
+  there is a derivation of the judgment $\JJ$.
+\end{definition}
+In other words, an admissible rule is redundant, not adding new power in proving judgments.
+
 \section{How to Define a Type?}
 
 Since type theory is about abstractions, there will be many types capturing different abstractions. To define types, one should answer the following five questions:
@@ -134,6 +239,203 @@ Since type theory is about abstractions, there will be many types capturing diff
 
 \section{Basic Types}
 
-\section{Categorical Aspects}
+For each type, we are going to answer the above five questions using judgments.
+
+\subsection{Pair Types}
+
+\begin{enumerate}
+  \item Formation:
+    \begin{prooftree*}
+      \hypo{\istype{A}}
+      \hypo{\istype{B}}
+      \infer2{\istype{\pairtype{A}{B}}}
+    \end{prooftree*}
+  \item Introduction:
+    \begin{prooftree*}
+      \hypo{\oftype{M}{A}}
+      \hypo{\oftype{N}{B}}
+      \infer2{\oftype{\pair{M}{N}}{\pairtype{A}{B}}}
+    \end{prooftree*}
+  \item Elimination:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\pairtype{A}{B}}}
+          \infer1{\oftype{\pairfst{M}}{A}}
+        \end{prooftree*}
+      \end{varwidth}
+      \and
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\pairtype{A}{B}}}
+          \infer1{\oftype{\pairsnd{M}}{B}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+  \item Computation:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{A}}
+          \hypo{\oftype{M}{B}}
+          \infer2{\eqterm{\pairfst{\pair{M}{N}}}{M}{A}}
+        \end{prooftree*}
+      \end{varwidth}
+      \and
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{A}}
+          \hypo{\oftype{M}{B}}
+          \infer2{\eqterm{\pairsnd{\pair{M}{N}}}{N}{B}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+  \item Uniqueness:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\pairtype{A}{B}}}
+          \infer1{\eqterm{M}{\pair{\pairfst{M}}{\pairsnd{M}}}{\pairtype{A}{B}}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+\end{enumerate}
+
+\subsection{Disjoint Sum Types}
+\begin{enumerate}
+  \item Formation:
+    \begin{prooftree*}
+      \hypo{\istype{A}}
+      \hypo{\istype{B}}
+      \infer2{\istype{\sumtype{A}{B}}}
+    \end{prooftree*}
+  \item Introduction:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{A}}
+          \infer1{\oftype{\suminl{M}}{\sumtype{A}{B}}}
+        \end{prooftree*}
+      \end{varwidth}
+      \and
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{B}}
+          \infer1{\oftype{\suminr{M}}{\sumtype{A}{B}}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+  \item Elimination:
+    \begin{prooftree*}
+      \hypo{\oftype{x{:}A}{M}{C}}
+      \hypo{\oftype{y{:}B}{N}{C}}
+      \hypo{\oftype{O}{\sumtype{A}{B}}}
+      \infer3{\oftype{\sumcase{x}{M}{y}{N}{O}}{C}}
+    \end{prooftree*}
+  \item Computation:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{x{:}A}{M}{C}}
+          \hypo{\oftype{y{:}B}{N}{C}}
+          \hypo{\oftype{O}{A}}
+          \infer3{\eqterm{\sumcase{x}{M}{y}{N}{\suminl{O}}}{M\subst{O}{x}}{C}}
+        \end{prooftree*}
+      \end{varwidth}
+      \and
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{x{:}A}{M}{C}}
+          \hypo{\oftype{y{:}B}{N}{C}}
+          \hypo{\oftype{O}{B}}
+          \infer3{\eqterm{\sumcase{x}{M}{y}{N}{\suminr{O}}}{N\subst{O}{y}}{C}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+\end{enumerate}
+
+\subsection{The Unit Type}
+\begin{enumerate}
+  \item Formation:
+    \begin{prooftree*}
+      \infer0{\istype{\unittype}}
+    \end{prooftree*}
+  \item Introduction:
+    \begin{prooftree*}
+      \infer0{\oftype{\unitelem}{\unittype}}
+    \end{prooftree*}
+  \item Elimination: (no rules)
+  \item Computation: (no rules)
+  \item Uniqueness:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\unittype}}
+          \infer1{\eqterm{M}{\unitelem}{\unittype}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+\end{enumerate}
+
+\subsection{The Bottom Type}
+\begin{enumerate}
+  \item Formation:
+    \begin{prooftree*}
+      \infer0{\istype{\emptytype}}
+    \end{prooftree*}
+  \item Introduction: (no rules)
+  \item Elimination:
+    \begin{prooftree*}
+      \hypo{\oftype{M}{\emptytype}}
+  \infer1{\oftype{\emptyabort{M}}{C}}
+    \end{prooftree*}
+  \item Computation: (no rules)
+\end{enumerate}
+
+\subsection{Function Types}
+\begin{enumerate}
+  \item Formation:
+    \begin{prooftree*}
+      \hypo{\istype{A}}
+      \hypo{\istype{B}}
+      \infer2{\istype{\funtype{A}{B}}}
+    \end{prooftree*}
+  \item Introduction:
+    \begin{prooftree*}
+      \hypo{\oftype{x{:}A}{M}{B}}
+      \infer1{\oftype{\lam{x}{M}}{\funtype{A}{B}}}
+    \end{prooftree*}
+  \item Elimination:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\funtype{A}{B}}}
+          \hypo{\oftype{N}{A}}
+          \infer2{\oftype{\app{M}{N}}{B}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+  \item Computation:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{x{:}A}{M}{B}}
+          \hypo{\oftype{N}{A}}
+          \infer2{\eqterm{\app{\parens{\lam{x}{M}}}{N}}{M\subst{N}{x}}{B}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+  \item Uniqueness:
+    \begin{mathpar}
+      \begin{varwidth}{\textwidth}
+        \begin{prooftree*}
+          \hypo{\oftype{M}{\funtype{A}{B}}}
+          \infer1{\eqterm{M}{\lam{x}{\app{M}{x}}}{\funtype{A}{B}}}
+        \end{prooftree*}
+      \end{varwidth}
+    \end{mathpar}
+\end{enumerate}
+
+\printbibliography
 
 \end{document}
