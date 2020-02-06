@@ -1,0 +1,123 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hdtt2020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Other Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{amsmath,amsthm,amssymb}
+\RequirePackage{mathtools}
+\RequirePackage{microtype}
+\RequirePackage{xparse}
+\RequirePackage{mathpartir}
+\RequirePackage{ebproof}
+\RequirePackage{booktabs}
+\RequirePackage[usenames,svgnames]{xcolor}
+\RequirePackage{mleftright}
+\RequirePackage{adjustbox}
+\RequirePackage{biblatex}
+\RequirePackage{hyperref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start of the Content
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProcessOptions\relax
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibilography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{references.bib}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Delimiters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NewDocumentCommand\NewPairedDelimiter{mmmmO{0mu}O{0mu}}{%
+  \NewDocumentCommand#2{mmm}{%
+    \IfNoValueTF{##2}
+      {\IfBooleanTF{##1}
+        {\mskip#6\mleft#3\mskip#5##3\mskip#5\mright#4\mskip#6}
+        {\mskip#6#3\mskip#5##3\mskip#5#4\mskip#6}}
+      {\mskip#6\mathopen{##2#3}\mskip#5##3\mskip#5\mathclose{##2#4}\mskip#6}%
+  }
+  \NewDocumentCommand#1{som}{#2{##1}{##2}{##3}}
+}
+\NewDocumentCommand\NewTripleDelimiter{mmmmmO{0mu}O{0mu}O{0mu}}{%
+  \NewDocumentCommand#2{mmmm}{%
+    \IfNoValueTF{##2}
+      {\IfBooleanTF{##1}
+        {\mskip#8\mleft#3\mskip#7##3\mskip#6\middle#4\mskip#6##4\mskip#7\mright#5\mskip#8}
+        {\mskip#8#3\mskip#7##3\mskip#6#4\mskip#6##4\mskip#7#5\mskip#8}}
+      {\mskip#8\mathopen{##2#3}\mskip#7##3\mskip#6{##2#4}\mskip#6##4\mskip#7\mathclose{##2#5}\mskip#8}%
+  }
+  \NewDocumentCommand#1{somm}{#2{##1}{##2}{##3}{##4}}
+}
+
+\NewPairedDelimiter{\parens}{\rawparens}{\lparen}{\rparen}
+\NewPairedDelimiter{\brackets}{\rawbrackets}{[}{]}
+\NewPairedDelimiter{\braces}{\rawbraces}{\lbrace}{\rbrace}
+\NewPairedDelimiter{\angles}{\rawangles}{\langle}{\rangle}
+\NewTripleDelimiter{\subst}{\rawsubst}{[}{/}{]}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorem-like environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem{lemma}{Lemma}[section]
+\NewDocumentEnvironment{hint}{}{\noindent{\bf (Hint)}}{}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{task}{Task}
+\newtheorem{bonus}{Bonus Task}
+\renewenvironment{proof}{\trivlist \item[\hskip \labelsep{\bf Proof:}]}{\hfill$\Box$ \endtrivlist}
+\NewDocumentEnvironment{solution}{}{\trivlist \item[\hskip \labelsep{\bf Solution:}]}{\endtrivlist}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Type Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NewDocumentCommand{\ctx}{}{\Gamma}
+\NewDocumentCommand{\DD}{}{\mathcal{D}}
+\NewDocumentCommand{\emptyctx}{}{\cdot}
+\NewDocumentCommand{\entails}{gg}{\IfValueTF{#2}{\IfValueTF{#1}{#1\vdash#2}{\vdash#1}}{\vdash}}
+
+\NewDocumentCommand{\postfixjudgment}{m}{%
+  \relax\ifnum\lastnodetype>0\mskip\medmuskip\fi
+  \mathtt{#1}%
+}
+\NewDocumentCommand{\istype}{mg}{\IfValueTF{#2}{#1\vdash#2\postfixjudgment{type}}{#1\postfixjudgment{type}}}
+\NewDocumentCommand{\eqtype}{mmg}{\IfValueTF{#3}{#1\vdash#2\equiv#3}{#1\equiv#2}}
+\NewDocumentCommand{\oftype}{mmg}{\IfValueTF{#3}{#1\vdash#2:#3}{#1:#2}}
+\NewDocumentCommand{\eqterm}{mmmg}{\IfValueTF{#4}{#1\vdash#2\equiv#3:#4}{#1\equiv#2:#3}}
+
+\NewDocumentCommand{\unittype}{}{\top}
+\NewDocumentCommand{\unitelem}{}{\diamond}
+\NewDocumentCommand{\pairtype}{gg}{\IfValueTF{#1}{#1\times#2}{\mathbin{\times}}}
+\NewDocumentCommand{\pair}{mm}{\angles{#1 , #2}}
+\NewDocumentCommand{\pairfst}{g}{\pi_1\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\pairsnd}{g}{\pi_2\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\emptytype}{}{\bot}
+\NewDocumentCommand{\emptyabort}{g}{\mathtt{abort}\IfValueT{#1}{(#1)}}
+\NewDocumentCommand{\sumtype}{gg}{\IfValueTF{#1}{#1+#2}{\mathbin{+}}}
+\NewDocumentCommand{\suminl}{g}{\mathtt{inl}\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\suminr}{g}{\mathtt{inr}\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\sumcase}{ggggg}{\mathtt{case}\IfValueT{#1}{\parens{#1.#2; #3.#4\IfValueT{#5}{; #5}}}}
+\NewDocumentCommand{\funtype}{gg}{\IfValueTF{#1}{#1\to#2}{\mathbin{\to}}}
+\NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1:#2}.#3}{\lambda#1.#3}}{\lambda}}
+\NewDocumentCommand{\app}{mm}{#1\;#2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros for Logic / Lattice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NewDocumentCommand{\zero}{}{\varmathbb{0}}
+\NewDocumentCommand{\one}{}{\varmathbb{1}}
+\NewDocumentCommand{\meet}{}{\wedge}
+\NewDocumentCommand{\join}{}{\vee}
+\RenewDocumentCommand{\exp}{}{\supset}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros for Rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The End
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endinput
