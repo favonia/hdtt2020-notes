@@ -436,6 +436,18 @@ For each type, we are going to answer the above five questions using judgments.
     \end{mathpar}
 \end{enumerate}
 
+\section{Principle of Harmony}
+
+One important principle is the harmony between the answers to \textbf{Question (2)} (introductions) and \textbf{Question (3)} (eliminations). They need to satisfy the law of conservation of knowledge, like the law of conservation of energy in physics. The data you put in using the answers in \textbf{Question (2)} must equal to what you can learn via the answers to \textbf{Question (3).} For example, there are two projections from a pair, and thus it takes two components to make a pair. There are two (canonical) ways to make an element of a disjoint sum type, and thus there are two branches in $\sumcase$. There are no projection from an element of the unit type, and thus it takes nothing to construct an element of that type.
+
+\NewDocumentCommand{\alianpair}{}{\bigcirc}
+
+The principle of harmony is important because it \emph{often} (not as a mathematical theorem yet) implies that everything eventually reduces. For example, one can show that any pair (without free variables) will eventually reduce to a term of the form $\pair{M}{N}$, and thus a projection out of the pair will eventually be resolved, using the answers to \textbf{Question (4)} (computations). If we introduced a new form of pair, $\alianpair$, to break the harmony:
+\begin{prooftree*}
+  \infer0{\oftype{\alianpair}{\funtype{A}{B}}}
+\end{prooftree*}
+Then, the projections $\pairfst{\alianpair}$ and $\pairsnd{\alianpair}$ would be stuck. This shows why harmony is a necessary condition of the global property that everything reduces. In many cases, it is a sufficient condition, too.
+
 \printbibliography
 
 \end{document}
