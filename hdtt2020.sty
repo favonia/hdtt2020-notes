@@ -55,6 +55,7 @@
 \NewPairedDelimiter{\brackets}{\rawbrackets}{[}{]}
 \NewPairedDelimiter{\braces}{\rawbraces}{\lbrace}{\rbrace}
 \NewPairedDelimiter{\angles}{\rawangles}{\langle}{\rangle}
+\NewPairedDelimiter{\bbrackets}{\rawbbrackets}{\llbracket}{\rrbracket}
 \NewTripleDelimiter{\subst}{\rawsubst}{[}{/}{]}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,7 +100,10 @@
 \NewDocumentCommand{\sumtype}{gg}{\IfValueTF{#1}{#1+#2}{\mathbin{+}}}
 \NewDocumentCommand{\suminl}{g}{\mathtt{inl}\IfValueT{#1}{\parens{#1}}}
 \NewDocumentCommand{\suminr}{g}{\mathtt{inr}\IfValueT{#1}{\parens{#1}}}
-\NewDocumentCommand{\sumcase}{ggggg}{\mathtt{case}\IfValueT{#1}{\parens{#1.#2; #3.#4\IfValueT{#5}{; #5}}}}
+\NewDocumentCommand{\sumcase}{ooggggg}{%
+  \mathtt{case}%
+  \IfValueT{#1}{\brackets{\IfValueTF{#2}{#1.#2}{#1}}}%
+  \IfValueT{#3}{\parens{#3.#4; #5.#6\IfValueT{#7}{; #7}}}}
 \NewDocumentCommand{\funtype}{gg}{\IfValueTF{#1}{#1\to#2}{\mathbin{\to}}}
 \NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1:#2}.#3}{\lambda#1.#3}}{\lambda}}
 \NewDocumentCommand{\app}{mm}{#1\;#2}
