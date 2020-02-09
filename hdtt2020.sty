@@ -91,6 +91,7 @@
 
 \NewDocumentCommand{\unittype}{}{\top}
 \NewDocumentCommand{\unitelem}{}{\diamond}
+\NewDocumentCommand{\dpairtype}{ggg}{\IfValueTF{#1}{\sum\limits_{#1{:}#2}#3}{\sum}}
 \NewDocumentCommand{\pairtype}{gg}{\IfValueTF{#1}{#1\times#2}{\mathbin{\times}}}
 \NewDocumentCommand{\pair}{mm}{\angles{#1 , #2}}
 \NewDocumentCommand{\pairfst}{g}{\pi_1\IfValueT{#1}{\parens{#1}}}
