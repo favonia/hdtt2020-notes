@@ -6,7 +6,7 @@ These are lecture notes of [Higher-Dimensional Type Theory (CSCI 8980) in 2020 S
 
 It is recommended to install the most recent TeX distributions, such as [TeXLive](https://www.tug.org/texlive/) and [MiKTeX](https://miktex.org/).
 
-Please install the TeX package `newtx` via your OS or TeX package manager if you see the following error message:
+In case you see the following error message, please install the TeX package `newtx` via your OS or TeX package manager:
 ```
 kpathsea: Running mktexmf txex-bar
 ! I can't find file `txex-bar'.
