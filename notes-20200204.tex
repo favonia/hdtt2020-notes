@@ -164,7 +164,7 @@ Dependent function types, also known as pi-types. There are several ways to repr
 \item Computation:
   \begin{mathpar}
     \begin{varwidth}{\textwidth}
-      \begin{prooftree*}
+     \begin{prooftree*}
         \hypo{\istype{z{:}\sumtype{A}{B}}{C}}
         \hypo{\oftype{O}{A}}
         \hypo{\oftype{x{:}A}{M}{C\subst{\suminl{x}}{z}}}
@@ -215,7 +215,7 @@ Dependent function types, also known as pi-types. There are several ways to repr
 \end{center}
 
  %\begin{tabular}{@{}c@{}}Three \\ Drie\end{tabular}
-Difference between negative and positive:
+Difference between negative and positive in type theory:
 \begin{enumerate}
     \item Negative: The introduction rule is constructed from the elimination rule.
     \item Positive: The elimination rule is constructed from the introduction rule.
@@ -224,16 +224,12 @@ Difference between negative and positive:
 \section{Martin-L\"of ethos/mythos}
 Every "cool" type is an internalization of some judgmental structure.
 \begin{enumerate}
-    \item $\Pi$-type: entailment
-    \begin{prooftree*}
-      \hypo{\oftype{x{:}A}{M}{B}}
-      \infer1{\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}}
-    \end{prooftree*}
-    \item $\Sigma$-type: context extension
-    \begin{prooftree*}
-      \hypo{\Gamma\times {A}}
-      \infer1{\dpairtype{x}{\Gamma}{A}}
-    \end{prooftree*}
+\item $\Pi$-type $\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}$
+  corresponds to the entailment $\oftype{x{:}A}{M}{B}$.
+\item $\Sigma$-type $\dpairtype{x}{\Gamma}{A}$
+  corresponds to the context extension $\Gamma, {A}$.
+\item The idenditity type corresponds to the judgmental equality rules.
+\item The universe type corresponds to the $\istype{A}$ judgments.
 \end{enumerate}
 
 \end{document}
