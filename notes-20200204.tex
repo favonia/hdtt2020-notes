@@ -129,7 +129,7 @@ Dependent function types, also known as pi-types. There are several ways to repr
   $\oftype{\pair{\pairfst{M}}{\pairsnd{M}}}{\dpairtype{x}{A}{B}}$.
 \end{enumerate}
 
-\section{Dependent Sum Types}
+\section{Dependent Disjoint Sum Types}
 \begin{enumerate}
 \item Formation:
   \begin{prooftree*}
@@ -223,7 +223,7 @@ Difference between negative and positive in type theory:
 However, we know there are two possible ways to define the pair type. The first one is using the two projections we present here. The other way is using the $\mathtt{split}$ operator mentioned in the previous lecture. If we define the product type using the second way, its polarity then becomes positive.
 
 \section{Martin-L\"of ethos/mythos}
-Every "cool" type is an internalization of some judgmental structure.
+Every ``cool'' type is an internalization of some judgmental structure.
 \begin{enumerate}
 \item $\Pi$-type $\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}$
   corresponds to the entailment $\oftype{x{:}A}{M}{B}$.
