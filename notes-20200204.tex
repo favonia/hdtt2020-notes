@@ -1,0 +1,236 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+
+\NewDocumentCommand{\TT}{}{\mathcal{T}}
+\NewDocumentCommand{\JJ}{}{\mathcal{J}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Zhuyang Wang, Bowen Wang}
+\date{February \{4\}, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Dependent Types}
+Dependent types can be seen as families of types indexed by other types. For example, if we want to represent the type of a fixed length vector, then it should be a family of types indexed by the natural number, which is its length. Suppose we already have the natural number type $\mathbb{N}$, the formation rule of the vector type $\mathtt{Vec}$ then should be $\istype{x{:}\mathbb{N}}{\mathtt{Vec}(x)}$. Thus $\mathtt{Vec}(1)$ is the type of length-1 vector, and $\mathtt{Vec}(0)$ is another type representing the type of empty vector. One can also think of dependent types as ``functions'', mapping inhabitants of some types to new types.
+
+All the structural rules introduced in the last lecture are actually the dependent version. For example, the exchange rule has the requirement that ``$B$ does not depend on $x$''. That said, other basic types are simply the non-dependent version, like the $\pairtype$-type and the $\funtype$-type. In the dependent version of pair types, the type of the second element depends on the type of the first element, which makes the rule much more complicated. The following sections will show how to define the dependent version of function types, product types and disjoint sum types, by providing the answers to the five (or four) questions. Unit types and empty types are almost the same as the original ones.
+
+\section{Dependent Function Types}
+%$\displaystyle \prod_{i=1}^{\infty} a_{i}$
+Dependent function types, also known as pi-types. There are several ways to represent a dependent function type: $\displaystyle \prod_{x:A} B$, $\displaystyle \prod_{x:A} B(x)$, or $\displaystyle \prod_{x:A} B_x$.
+
+\begin{enumerate}
+\item Formation
+  \begin{prooftree*}
+    \hypo{\istype{A}}
+    \hypo{\istype{x{:}A}{B}}
+    \infer2{\istype{\displaystyle\prod_{x{:}A}B}}
+  \end{prooftree*}
+\item Introduction 
+  \begin{prooftree*}
+    \hypo{\oftype{x{:}A}{M}{B}}
+    \infer1{\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}}
+  \end{prooftree*}
+\item Elimination
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{\displaystyle\prod_{x{:}A}B}}
+        \hypo{\oftype{N}{A}}
+        \infer2{\oftype{\app{M}{N}}{B\subst{N}{x}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\item Computation
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{x{:}A}{M}{B}}
+        \hypo{\oftype{N}{A}}
+        \infer2{\eqterm{\app{\parens{\lam{x}{M}}}{N}}{M\subst{N}{x}}{B\subst{N}{x}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\item Uniqueness
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{\displaystyle\prod_{x{:}A}B}}
+        \infer1{\eqterm{M}{\lam{x}{\app{M}{x}}}{\displaystyle\prod_{x{:}A}B}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\end{enumerate}
+
+\section{Dependent Pair Types}
+\begin{enumerate}
+\item Formation:
+  \begin{prooftree*}
+    \hypo{\istype{A}}
+    \hypo{\istype{x{:}A}{B}}
+    \infer2{\istype{\dpairtype{x}{A}{B}}}
+  \end{prooftree*}
+\item Introduction
+  \begin{prooftree*}
+    \hypo{\oftype{M}{A}}
+    \hypo{\istype{x{:}A}{B}}
+    \hypo{\oftype{N}{B\subst{M}{x}}}
+    \infer3{\oftype{\pair{M}{N}}{\dpairtype{x}{A}{B}}}
+  \end{prooftree*}
+\item Elimination
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+        \infer1{\oftype{\pairfst{M}}{A}}
+      \end{prooftree*}
+    \end{varwidth}
+    \and
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+        \infer1{\oftype{\pairsnd{M}}{B\subst{\pairfst{M}}{x}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+  The second elimination rule depends on the first one.
+\item Computation
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{A}}
+        \hypo{\istype{x{:}A}{B}}
+        \hypo{\oftype{N}{B\subst{M}{x}}}
+        \infer3{\eqterm{\pairfst{\pair{M}{N}}}{M}{A}}
+      \end{prooftree*}
+    \end{varwidth}
+    \and
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{A}}
+        \hypo{\istype{x{:}A}{B}}
+        \hypo{\oftype{N}{B\subst{M}{x}}}
+        \infer3{\eqterm{\pairsnd{\pair{M}{N}}}{N}{B\subst{M}{x}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\item Uniqueness
+  \begin{prooftree*}
+    \hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+    \infer1{\eqterm{\pair{\pairfst{M}}{\pairsnd{M}}}{M}{\dpairtype{x}{A}{B}}}
+  \end{prooftree*}
+  Notice that the elimination rules tell us
+  $\oftype{\pairfst{M}}{A}$ and $\oftype{\pairsnd{M}}{B\subst{\pairfst{M}}{x}}$.
+  Then by the introduction rule we know
+  $\oftype{\pair{\pairfst{M}}{\pairsnd{M}}}{\dpairtype{x}{A}{B}}$.
+\end{enumerate}
+
+\section{Dependent Disjoint Sum Types}
+\begin{enumerate}
+\item Formation:
+  \begin{prooftree*}
+    \hypo{\istype{A}}
+    \hypo{\istype{B}}
+    \infer2{\istype{\sumtype{A}{B}}}
+  \end{prooftree*}
+\item Introduction:
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{A}}
+        \infer1{\oftype{\suminl{M}}{\sumtype{A}{B}}}
+      \end{prooftree*}
+    \end{varwidth}
+    \and
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\oftype{M}{B}}
+        \infer1{\oftype{\suminr{M}}{\sumtype{A}{B}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\item Elimination:
+  \begin{prooftree*}
+    \hypo{\istype{z{:}\sumtype{A}{B}}{C}}
+    \hypo{\oftype{O}{\sumtype{A}{B}}}
+    \hypo{\oftype{x{:}A}{M}{C\subst{\suminl{x}}{z}}}
+    \hypo{\oftype{y{:}B}{N}{C\subst{\suminr{y}}{z}}}
+    \infer4{\oftype{\sumcase[z][C]{x}{M}{y}{N}{O}}{C\subst{O}{z}}}
+  \end{prooftree*}
+\item Computation:
+  \begin{mathpar}
+    \begin{varwidth}{\textwidth}
+     \begin{prooftree*}
+        \hypo{\istype{z{:}\sumtype{A}{B}}{C}}
+        \hypo{\oftype{O}{A}}
+        \hypo{\oftype{x{:}A}{M}{C\subst{\suminl{x}}{z}}}
+        \hypo{\oftype{y{:}B}{N}{C\subst{\suminr{y}}{z}}}
+        \infer4{\eqterm{\sumcase[z][C]{x}{M}{y}{N}{\suminl{O}}}{M\subst{O}{x}}{C\subst{O}{z}}}
+      \end{prooftree*}
+    \end{varwidth}
+    \and
+    \begin{varwidth}{\textwidth}
+      \begin{prooftree*}
+        \hypo{\istype{z{:}\sumtype{A}{B}}{C}}
+        \hypo{\oftype{O}{B}}
+        \hypo{\oftype{x{:}A}{M}{C\subst{\suminl{x}}{z}}}
+        \hypo{\oftype{y{:}B}{N}{C\subst{\suminr{y}}{z}}}
+        \infer4{\eqterm{\sumcase[z][C]{x}{M}{y}{N}{\suminr{O}}}{N\subst{O}{y}}{C\subst{O}{z}}}
+      \end{prooftree*}
+    \end{varwidth}
+  \end{mathpar}
+\end{enumerate}
+
+\section{Polarity}
+%\begin{center}
+% \begin{tabular}{c|p{75}|c|c}
+%     Classification & Cat Theory & Sequence Calculus & Type Theory\\\hline
+%     Negative & mapping in universal property & right rules invertible & $\Pi$ $\Sigma$ $\pairtype$ $\funtype$ $\top$\\\hline
+%     Positive & mapping out universal property & left rules invertible & $\sumtype$ $\bot$\\\hline
+% \end{tabular}   
+%\end{center}
+
+\begin{center}
+ \begin{tabular}{c|c|c|c}
+     Classification & Cat Theory & Sequent Calculus & Type Theory\\\hline
+     Negative & 
+     \begin{tabular} {@{}c@{}} mapping in \\ universal \\property \end{tabular}
+     & 
+     \begin{tabular}
+          {@{}c@{}} right rules \\ invertible
+     \end{tabular}
+     & $\Pi$ $\Sigma$ $\pairtype$ $\funtype$ $\top$\\\hline
+     Positive & 
+     \begin{tabular} {@{}c@{}} mapping out \\ universal \\property \end{tabular}
+     & 
+     \begin{tabular}
+          {@{}c@{}} left rules \\ invertible
+     \end{tabular}
+     & $\sumtype$ $\bot$\\\hline
+ \end{tabular}   
+\end{center}
+
+ %\begin{tabular}{@{}c@{}}Three \\ Drie\end{tabular}
+Difference between negative and positive in type theory:
+\begin{enumerate}
+    \item Negative: The introduction rule is constructed from the elimination rule.
+    \item Positive: The elimination rule is constructed from the introduction rule.
+\end{enumerate}
+However, we know there are two possible ways to define the pair type. The first one is using the two projections we present here. The other way is using the $\mathtt{split}$ operator mentioned in the previous lecture. If we define the product type using the second way, its polarity then becomes positive.
+
+\section{Martin-L\"of ethos/mythos}
+Every ``cool'' type is an internalization of some judgmental structure.
+\begin{enumerate}
+\item $\Pi$-type $\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}$
+  corresponds to the entailment $\oftype{x{:}A}{M}{B}$.
+\item $\Sigma$-type $\dpairtype{x}{\Gamma}{A}$
+  corresponds to the context extension $\Gamma, {A}$.
+\item The idenditity type corresponds to the judgmental equality rules.
+\item The universe type corresponds to the $\istype{A}$ judgments.
+\end{enumerate}
+
+\end{document}
