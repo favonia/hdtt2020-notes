@@ -91,7 +91,8 @@
 
 \NewDocumentCommand{\unittype}{}{\top}
 \NewDocumentCommand{\unitelem}{}{\diamond}
-\NewDocumentCommand{\dpairtype}{ggg}{\IfValueTF{#1}{\sum\limits_{#1{:}#2}#3}{\sum}}
+\NewDocumentCommand{\dpairtype}{sggg}{\IfBooleanT{#1}{\displaystyle}\IfValueTF{#2}{\sum\limits_{#2{:}#3}#4}{\sum}}
+% \dpairtype*{x}{A}{B} forces the \displaystyle
 \NewDocumentCommand{\pairtype}{gg}{\IfValueTF{#1}{#1\times#2}{\mathbin{\times}}}
 \NewDocumentCommand{\pair}{mm}{\angles{#1 , #2}}
 \NewDocumentCommand{\pairfst}{g}{\pi_1\IfValueT{#1}{\parens{#1}}}
@@ -105,9 +106,12 @@
   \mathtt{case}%
   \IfValueT{#1}{\brackets{\IfValueTF{#2}{#1.#2}{#1}}}%
   \IfValueT{#3}{\parens{#3.#4; #5.#6\IfValueT{#7}{; #7}}}}
+\NewDocumentCommand{\dfuntype}{sggg}{\IfBooleanT{#1}{\displaystyle}\IfValueTF{#2}{\prod\limits_{#2{:}#3}#4}{\prod}}
+% \dfuntype*{x}{A}{B} forces the \displaystyle
 \NewDocumentCommand{\funtype}{gg}{\IfValueTF{#1}{#1\to#2}{\mathbin{\to}}}
 \NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1:#2}.#3}{\lambda#1.#3}}{\lambda}}
 \NewDocumentCommand{\app}{mm}{#1\;#2}
+\NewDocumentCommand{\nattype}{}{\varmathbb{N}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Macros for Logic / Lattice

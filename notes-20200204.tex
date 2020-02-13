@@ -15,31 +15,31 @@
 \maketitle
 
 \section{Dependent Types}
-Dependent types can be seen as families of types indexed by other types. For example, if we want to represent the type of a fixed length vector, then it should be a family of types indexed by the natural number, which is its length. Suppose we already have the natural number type $\mathbb{N}$, the formation rule of the vector type $\mathtt{Vec}$ then should be $\istype{x{:}\mathbb{N}}{\mathtt{Vec}(x)}$. Thus $\mathtt{Vec}(1)$ is the type of length-1 vector, and $\mathtt{Vec}(0)$ is another type representing the type of empty vector. One can also think of dependent types as ``functions'', mapping inhabitants of some types to new types.
+Dependent types can be seen as families of types indexed by other types. For example, if we want to represent the type of a fixed length vector, then it should be a family of types indexed by the natural number, which is its length. Suppose we already have the natural number type $\nattype$, the formation rule of the vector type $\mathtt{Vec}$ then should be $\istype{x{:}\nattype}{\mathtt{Vec}(x)}$. Thus $\mathtt{Vec}(1)$ is the type of length-1 vector, and $\mathtt{Vec}(0)$ is another type representing the type of empty vector. One can also think of dependent types as ``functions'', mapping inhabitants of some types to new types.
 
 All the structural rules introduced in the last lecture are actually the dependent version. For example, the exchange rule has the requirement that ``$B$ does not depend on $x$''. That said, other basic types are simply the non-dependent version, like the $\pairtype$-type and the $\funtype$-type. In the dependent version of pair types, the type of the second element depends on the type of the first element, which makes the rule much more complicated. The following sections will show how to define the dependent version of function types, product types and disjoint sum types, by providing the answers to the five (or four) questions. Unit types and empty types are almost the same as the original ones.
 
 \section{Dependent Function Types}
 %$\displaystyle \prod_{i=1}^{\infty} a_{i}$
-Dependent function types, also known as pi-types. There are several ways to represent a dependent function type: $\displaystyle \prod_{x:A} B$, $\displaystyle \prod_{x:A} B(x)$, or $\displaystyle \prod_{x:A} B_x$.
+Dependent function types, also known as pi-types. There are several ways to represent a dependent function type: $\dfuntype{x}{A}{B}$, $\dfuntype{x}{A}{B\parens{x}}$, or $\dfuntype{x}{A}{B_x}$.
 
 \begin{enumerate}
 \item Formation
   \begin{prooftree*}
     \hypo{\istype{A}}
     \hypo{\istype{x{:}A}{B}}
-    \infer2{\istype{\displaystyle\prod_{x{:}A}B}}
+    \infer2{\istype{\dfuntype{x}{A}{B}}}
   \end{prooftree*}
-\item Introduction 
+\item Introduction
   \begin{prooftree*}
     \hypo{\oftype{x{:}A}{M}{B}}
-    \infer1{\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}}
+    \infer1{\oftype{\lam{x}{M}}{\dfuntype{x}{A}{B}}}
   \end{prooftree*}
 \item Elimination
   \begin{mathpar}
     \begin{varwidth}{\textwidth}
       \begin{prooftree*}
-        \hypo{\oftype{M}{\displaystyle\prod_{x{:}A}B}}
+        \hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
         \hypo{\oftype{N}{A}}
         \infer2{\oftype{\app{M}{N}}{B\subst{N}{x}}}
       \end{prooftree*}
@@ -59,8 +59,8 @@ Dependent function types, also known as pi-types. There are several ways to repr
   \begin{mathpar}
     \begin{varwidth}{\textwidth}
       \begin{prooftree*}
-        \hypo{\oftype{M}{\displaystyle\prod_{x{:}A}B}}
-        \infer1{\eqterm{M}{\lam{x}{\app{M}{x}}}{\displaystyle\prod_{x{:}A}B}}
+        \hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
+        \infer1{\eqterm{M}{\lam{x}{\app{M}{x}}}{\dfuntype{x}{A}{B}}}
       \end{prooftree*}
     \end{varwidth}
   \end{mathpar}
@@ -118,6 +118,7 @@ Dependent function types, also known as pi-types. There are several ways to repr
       \end{prooftree*}
     \end{varwidth}
   \end{mathpar}
+  $\pairsnd{\pair{M}{N}}$ is of type $B\subst{M}{x}$ because $\eqterm{\pairfst{\pair{M}{N}}}{M}{A}$.
 \item Uniqueness
   \begin{prooftree*}
     \hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
@@ -129,7 +130,7 @@ Dependent function types, also known as pi-types. There are several ways to repr
   $\oftype{\pair{\pairfst{M}}{\pairsnd{M}}}{\dpairtype{x}{A}{B}}$.
 \end{enumerate}
 
-\section{Dependent Disjoint Sum Types}
+\section{Disjoint Sum Types}
 \begin{enumerate}
 \item Formation:
   \begin{prooftree*}
@@ -189,29 +190,29 @@ Dependent function types, also known as pi-types. There are several ways to repr
 %\begin{center}
 % \begin{tabular}{c|p{75}|c|c}
 %     Classification & Cat Theory & Sequence Calculus & Type Theory\\\hline
-%     Negative & mapping in universal property & right rules invertible & $\Pi$ $\Sigma$ $\pairtype$ $\funtype$ $\top$\\\hline
+%     Negative & mapping in universal property & right rules invertible & $\dfuntype$ $\dpairtype$ $\pairtype$ $\funtype$ $\top$\\\hline
 %     Positive & mapping out universal property & left rules invertible & $\sumtype$ $\bot$\\\hline
-% \end{tabular}   
+% \end{tabular}
 %\end{center}
 
 \begin{center}
  \begin{tabular}{c|c|c|c}
-     Classification & Cat Theory & Sequent Calculus & Type Theory\\\hline
-     Negative & 
+     Classification & Category Theory & Sequent Calculus & Type Theory\\\hline
+     Negative &
      \begin{tabular} {@{}c@{}} mapping in \\ universal \\property \end{tabular}
-     & 
+     &
      \begin{tabular}
           {@{}c@{}} right rules \\ invertible
      \end{tabular}
-     & $\Pi$ $\Sigma$ $\pairtype$ $\funtype$ $\top$\\\hline
-     Positive & 
+     & $\dfuntype$ $\dpairtype$ $\pairtype$ $\funtype$ $\top$\\\hline
+     Positive &
      \begin{tabular} {@{}c@{}} mapping out \\ universal \\property \end{tabular}
-     & 
+     &
      \begin{tabular}
           {@{}c@{}} left rules \\ invertible
      \end{tabular}
      & $\sumtype$ $\bot$\\\hline
- \end{tabular}   
+ \end{tabular}
 \end{center}
 
  %\begin{tabular}{@{}c@{}}Three \\ Drie\end{tabular}
@@ -220,15 +221,15 @@ Difference between negative and positive in type theory:
     \item Negative: The introduction rule is constructed from the elimination rule.
     \item Positive: The elimination rule is constructed from the introduction rule.
 \end{enumerate}
-However, we know there are two possible ways to define the pair type. The first one is using the two projections we present here. The other way is using the $\mathtt{split}$ operator mentioned in the previous lecture. If we define the product type using the second way, its polarity then becomes positive.
+However, we know there are two possible ways to define the pair type. The first one is using the two projections we present here. The other way is using the $\mathtt{split}$ operator mentioned in the previous lecture. If we define the pair type using the second way, its polarity then becomes positive.
 
 \section{Martin-L\"of ethos/mythos}
 Every ``cool'' type is an internalization of some judgmental structure.
 \begin{enumerate}
-\item $\Pi$-type $\oftype{\lam{x}{M}}{\displaystyle\prod_{x{:}A}B}$
+\item $\dfuntype$-type $\oftype{\lam{x}{M}}{\dfuntype{x}{A}{B}}$
   corresponds to the entailment $\oftype{x{:}A}{M}{B}$.
-\item $\Sigma$-type $\dpairtype{x}{\Gamma}{A}$
-  corresponds to the context extension $\Gamma, {A}$.
+\item $\dpairtype$-type $\dpairtype{x}{\ctx}{A}$
+  corresponds to the context extension $\ctx, {A}$.
 \item The idenditity type corresponds to the judgmental equality rules.
 \item The universe type corresponds to the $\istype{A}$ judgments.
 \end{enumerate}
