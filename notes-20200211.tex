@@ -129,6 +129,12 @@ Note that by the substitutional nature of judgmental equality the converse holds
 
 In this sense, equality types and judgmental equality are equivalent. Formally, the rules of equality types consist of those of identification types and the equality reflection rule.
 
+Note: One implementation of equality types additionally has the following uniqueness rule:
+\begin{prooftree*}
+	\hypo{\oftype{p}{\mathtt{Eq}_A\parens{M; N}}}
+	\infer1[$\mathtt{Eq}$-uniq]{\eqterm{p}{\idrefl}{\mathtt{Eq}_A\parens{M; N}}}
+\end{prooftree*}
+
 \subsection{Reflection-Free Equality Types}
 A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
 
