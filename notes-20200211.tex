@@ -29,17 +29,15 @@ There are several different specific notions of equality used in papers. Some ef
 A natural idea for implementing equality is to specify pairs of terms to be equated directly by judgments, which convey no information other than the equated terms (and, in the type theories we're studying in this course, their type). The equality judgment is written like:
 
 \[
-	\eqterm{\Gamma}{M}{N}{A}
+	\eqtype{\Gamma}{A}{B}
 \]
 
 Judgmental equality is \emph{silent and substitutional}, in the sense that:
 
 \begin{prooftree*}
 	\hypo{\oftype{\Gamma}{M}{A}}
-	\ellipsis{}{\hspace{0.75in}}
-	\hypo{\eqterm{\Gamma}{M}{N}{A}}
-	\ellipsis{}{\hspace{0.75in}}
-	\infer2{\oftype{\Gamma}{N}{A}}
+	\hypo{\eqtype{\Gamma}{A}{B}}
+	\infer2{\oftype{\Gamma}{M}{B}}
 \end{prooftree*}
 
 This is a useful property if one wants to prove subject reduction (aka type preservation).
@@ -111,9 +109,6 @@ There is also an alternative formulation of $\idtype$-elim and $\idtype$-comp:
 	\infer2[$\idtype$-comp$^{M=}$]{\eqterm{\mathtt{J}^{M=}\brackets{x.q.C}\parens{N; \idrefl{M}}}{N}{C[x \rightarrow M, q \rightarrow \idrefl{M}]}}
 \end{prooftree*}
 
-% NOTE(remexre): The below \cite doesn't render on tectonic; I haven't been
-% able to get it working with pdflatex+biber either, but I'm not enough of
-% a TeX wizard to know what the issue is.
 This formulation is often easier to use in practice, but is equivalent to the one initially presented; see section 1.12.1 of \cite{hott-as:book} for details.
 
 \subsection{(Usual) Equality Types}
@@ -135,14 +130,8 @@ Note that by the substitutional nature of judgmental equality the converse holds
 In this sense, equality types and judgmental equality are equivalent. Formally, the rules of equality types consist of those of identification types and the equality reflection rule.
 
 \subsection{Reflection-Free Equality Types}
-A variant of equality types is reflection-free equality types. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
+A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
 
-% \begin{mathpar}
-% \AxiomC{$\Gamma \vdash P : \mathsf{Eq}_A(M, N)$}
-% \AxiomC{$\Gamma \vdash Q : \mathsf{Eq}_A(M, N)$}
-% \BinaryInfC{$\Gamma \vdash P \equiv Q : \mathsf{Eq}_A(M, N)$}
-% \DisplayProof
-% \end{mathpar}
 \begin{prooftree*}
 	\hypo{\oftype{\ctx}{p}{\mathtt{Eq}_A\parens{M; N}}}
 	\hypo{\oftype{\ctx}{q}{\mathtt{Eq}_A\parens{M; N}}}
@@ -158,10 +147,10 @@ Alternatively, we may employ Axiom K, which is equivalent to UIP in the sense th
 
 We can also extend identification types with UIP; again see \cite{hott-as:book} for the details. 
 
-\section{The $\omega$-Groupoid Structure of Types}
+\section{The $\infty$-Groupoid Structure of Types}
 
 \begin{theorem}
-Each type $A$ has the structure of an $\omega$-groupoid induced by the identification types constructed from $A$ (recall that a groupoid is a category whose morphisms are all isomorphisms, and an $\omega$-groupoid is an ``infinite-dimensional generalization'' of a groupoid).
+Each type $A$ has the structure of an $\infty$-groupoid induced by the identification types constructed from $A$ (recall that a groupoid is a category whose morphisms are all isomorphisms, and an $\infty$-groupoid is an ``infinite-dimensional generalization'' of a groupoid).
 \end{theorem}
 
 This theorem discovers a new connection between type theory and higher category theory. Note, however, that the theorem does not hold if identification types are substituted by equality types or reflection-free equality types introduced below; this is one of the main reasons why identification types are the most popular choice among types on equality.
