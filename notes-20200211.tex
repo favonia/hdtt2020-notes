@@ -16,7 +16,7 @@ Two commonly used but insufficiently precise terms used to dicuss notions of equ
 
 An extensional notion of equality treats two objects that have observationally equivalent properties as being equal. For example, one might consider the sets $A = \left(\{\textrm{single-digit primes}\} \cup \{6\}\right)$ to be extensionally equal to $B = \left(\{\textrm{single-digit numbers}\} - \{x^2 \mid x \in \mathbb{N}\}\right)$, since $\forall n. \left(n \in A \iff n \in B\right)$. Similarly, $x + y$ and $y + x$ would be considered equal, since their results are the same for any $x$ and $y$.
 
-Contrastingly, an intensional notion of equality only considers objects to be equal if their definitions are equal. Often the equality of definitions is checked syntactically; i.e., two definitions are equivalent if and only if they are literally textually identical. With such a definition, neither $A$ and $B$ nor $x + y$ and $y + x$ would \textbf{not} be considered equal,
+Contrastingly, an intensional notion of equality only considers objects to be equal if their definitions are equal. Often the equality of definitions is checked syntactically; i.e., two definitions are equivalent if and only if they are literally textually identical. With such a definition, neither $A$ and $B$ nor $x + y$ and $y + x$ would \textbf{not} be considered equal.
 
 Theories built on the lambda calculus that claim to use intensional equality will often define this syntactic equality to be after $\alpha$, $\beta$, and $\eta$-normalization. This makes the terms $\lam{x}[\nattype]{x}$ and $\app{\parens{\lam{p}[\funtype{\nattype}{\nattype}]{p}}}{\parens{\lam{q}[\nattype]{q}}}$ equal, and is often useful, since the evaluation rules don't need to be manipulated by the user.
 
