@@ -135,7 +135,7 @@ In this sense, equality types and judgmental equality are equivalent. Formally, 
 \end{prooftree*}
 
 \subsection{Reflection-Free Equality Types}
-A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
+A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict version of the principle of uniqueness of identity proofs (UIP):
 
 \begin{prooftree*}
 	\hypo{\oftype{\ctx}{p}{\mathtt{Eq}_A\parens{M; N}}}
