@@ -1,0 +1,174 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Norihiro Yamada, Nathan Ringo}
+\date{February 11, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Extensionality and Intensionality}
+Two commonly used but insufficiently precise terms used to dicuss notions of equality are ``extensional equality'' and ``intensional equality.''
+
+An extensional notion of equality treats two objects that have observationally equivalent properties as being equal. For example, one might consider the sets $A = \left(\{\textrm{single-digit primes}\} \cup \{6\}\right)$ to be extensionally equal to $B = \left(\{\textrm{single-digit numbers}\} - \{x^2 \mid x \in \mathbb{N}\}\right)$, since $\forall n. \left(n \in A \iff n \in B\right)$. Similarly, $x + y$ and $y + x$ would be considered equal, since their results are the same for any $x$ and $y$.
+
+Contrastingly, an intensional notion of equality only considers objects to be equal if their definitions are equal. Often the equality of definitions is checked syntactically; i.e., two definitions are equivalent if and only if they are literally textually identical. With such a definition, neither $A$ and $B$ nor $x + y$ and $y + x$ would \textbf{not} be considered equal.
+
+Theories built on the lambda calculus that claim to use intensional equality will often define this syntactic equality to be after $\alpha$, $\beta$, and $\eta$-normalization. This makes the terms $\lam{x}[\nattype]{x}$ and $\app{\parens{\lam{p}[\funtype{\nattype}{\nattype}]{p}}}{\parens{\lam{q}[\nattype]{q}}}$ equal, and is often useful, since the evaluation rules don't need to be manipulated by the user.
+
+\section{Equalities}
+
+There are several different specific notions of equality used in papers. Some effort is required to determine which one is in use.
+
+\subsection{Judgmental Equality}
+
+A natural idea for implementing equality is to specify pairs of terms to be equated directly by judgments, which convey no information other than the equated terms (and, in the type theories we're studying in this course, their type). The equality judgment is written like:
+
+\[
+	\eqtype{\Gamma}{A}{B}
+\]
+
+Judgmental equality is \emph{silent and substitutional}, in the sense that:
+
+\begin{prooftree*}
+	\hypo{\oftype{\Gamma}{M}{A}}
+	\hypo{\eqtype{\Gamma}{A}{B}}
+	\infer2{\oftype{\Gamma}{M}{B}}
+\end{prooftree*}
+
+This is a useful property if one wants to prove subject reduction (aka type preservation).
+
+However, judgmental equality lacks the ability to be used hypothetically, since judgments cannot be added to the context. To be able to do proofs that require assuming an equality (for example, showing that an assumption leads to a contradiction), we often want a different notion of equality, typically formalized as one of the types described below.
+
+\subsection{Identification Types}
+
+One of the best-known ways for encoding equality as a type is the family of identification types (also called identity types), notated $\idtype{A}{M}{N}$. Intensional Martin-L\"of Type Theory (or Intensional Type Theory) often adopts identification types.
+
+The rules that define them are:
+
+\begin{enumerate}
+\item Formation:
+	\begin{prooftree*}
+		\hypo{\istype{A}}
+		\hypo{\oftype{M}{A}}
+		\hypo{\oftype{N}{A}}
+		\infer3[$\idtype$-form]{\istype{\idtype{A}{M}{N}}}
+	\end{prooftree*}
+\item Introduction:
+	\begin{prooftree*}
+		\hypo{\oftype{M}{A}}
+		\infer1[$\idtype$-intro]{\oftype{\idrefl{M}}{\idtype{A}{M}{M}}}
+	\end{prooftree*}
+\item Elimination:
+	\begin{prooftree*}
+		\hypo{\istype{A}}
+		\hypo{\oftype{N}{A}}
+		\hypo{\oftype{O}{A}}
+		\hypo{\oftype{p}{\idtype{A}{N}{O}}}
+		% FIXME(remexre): blegh... massive hack, since I can't figure
+		% out how to get ebproof to insert newlines...
+		\infer[no rule]4{\istype{x{:}A,y{:}A,q{:}\idtype{A}{x}{y}}{C}}
+		\infer[no rule]1{\oftype{z{:}A}{M}{C[x \rightarrow z, y \rightarrow z, q \rightarrow \idrefl{z}]}}
+		\infer1[$\idtype$-elim]{\oftype{\idJ[x][y][q][C]{z}{M}{p}}{C[x \rightarrow N, y \rightarrow O, q \rightarrow p]}}
+	\end{prooftree*}
+\item Computation:
+	\begin{prooftree*}
+		\hypo{\istype{A}}
+		\hypo{\oftype{N}{A}}
+		\hypo{\oftype{O}{A}}
+		% FIXME(remexre): same hack as above... :(
+		\infer[no rule]3{\istype{x{:}A,y{:}A,q{:}\idtype{A}{x}{y}}{C}}
+		\infer[no rule]1{\oftype{z{:}A}{M}{C[x \rightarrow z, y \rightarrow z, q \rightarrow \idrefl{z}]}}
+		\infer1[$\idtype$-comp]{\eqterm{\idJ[x][y][q][C]{z}{M}{\idrefl{N}}}{M[z \rightarrow N]}{C[x \rightarrow N, y \rightarrow O, q \rightarrow \idrefl{N}]}}
+	\end{prooftree*}
+\end{enumerate}
+
+The elimination and computation rules here are more complicated than those encountered previously. so some explanation is warranted. These rules state that to prove a statement $C$ containing a term on an identification type $q$, it suffices to consider the case where the term is $\idrefl$. This is justified by the only introduction rule being the reflexive case of equality.
+
+There is also an alternative formulation of $\idtype$-elim and $\idtype$-comp:
+
+% FIXME(remexre): The hack deepens...
+\begin{prooftree*}
+	\hypo{\istype{A}}
+	\hypo{\oftype{M}{A}}
+	\infer[no rule]2{\oftype{P}{\idtype{A}{M}{M}}}
+	\hypo{\istype{x{:}A,q{:}\idtype{A}{M}{x}}{C}}
+	\infer[no rule]1{\oftype{N}{C[x \rightarrow M, q \rightarrow \idrefl{M}]}}
+	\infer2[$\idtype$-elim$^{M=}$]{\oftype{\mathtt{J}^{M=}\brackets{x.q.C}\parens{N; P}}{C[x \rightarrow M, q \rightarrow \idrefl{M}]}}
+\end{prooftree*}
+\begin{prooftree*}
+	\hypo{\istype{A}}
+	\hypo{\oftype{M}{A}}
+	\infer[no rule]2{\oftype{P}{\idtype{A}{M}{M}}}
+	\hypo{\istype{x{:}A,q{:}\idtype{A}{M}{x}}{C}}
+	\infer[no rule]1{\oftype{N}{C[x \rightarrow M, q \rightarrow \idrefl{M}]}}
+	\infer2[$\idtype$-comp$^{M=}$]{\eqterm{\mathtt{J}^{M=}\brackets{x.q.C}\parens{N; \idrefl{M}}}{N}{C[x \rightarrow M, q \rightarrow \idrefl{M}]}}
+\end{prooftree*}
+
+This formulation is often easier to use in practice, but is equivalent to the one initially presented; see section 1.12.1 of \cite{hott-as:book} for details.
+
+\subsection{(Usual) Equality Types}
+
+Next, we introduce equality types $\mathtt{Eq}_A\parens{M; N}$. They are intended to be a direct internalization of judgmental equality by the following equality reflection rule:
+
+\begin{prooftree*}
+	\hypo{\oftype{\ctx}{p}{\mathtt{Eq}_A\parens{M; N}}}
+	\infer1{\eqterm{\ctx}{M}{N}{A}}
+\end{prooftree*}
+
+Note that by the substitutional nature of judgmental equality the converse holds as well:
+
+\begin{prooftree*}
+	\hypo{\eqterm{\ctx}{M}{N}{A}}
+	\infer1{\oftype{\ctx}{\idrefl{M}}{\mathtt{Eq}_A\parens{M; N}}}
+\end{prooftree*}
+
+In this sense, equality types and judgmental equality are equivalent. Formally, the rules of equality types consist of those of identification types, the equality reflection rule, and the following uniqueness rule:
+
+\begin{prooftree*}
+	\hypo{\oftype{p}{\mathtt{Eq}_A\parens{M; N}}}
+	\infer1[$\mathtt{Eq}$-uniq]{\eqterm{p}{\idrefl}{\mathtt{Eq}_A\parens{M; N}}}
+\end{prooftree*}
+
+\subsection{Reflection-Free Equality Types}
+A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
+
+\begin{prooftree*}
+	\hypo{\oftype{\ctx}{p}{\mathtt{Eq}_A\parens{M; N}}}
+	\hypo{\oftype{\ctx}{q}{\mathtt{Eq}_A\parens{M; N}}}
+	\infer2{\eqterm{\ctx}{p}{q}{\mathtt{Eq}_A\parens{M; N}}}
+\end{prooftree*}
+
+That is, UIP states that there is at most one term of a reflection-free equality type.
+Note that the principle is called \emph{strict} because the equality between terms of the same reflection-free equality type in the conclusion is judgmental. 
+
+\subsection{Identification Types with UIP}
+
+We can also extend identification types with UIP, or alternatively Axiom K. Axiom K is equivalent to UIP in the sense that either of the two is derivable from the other; see section 7.2 of \cite{hott-as:book} for the details. 
+
+\section{The $\infty$-Groupoid Structure of Types}
+
+\begin{theorem}
+Each type $A$ has the structure of an $\infty$-groupoid induced by the identification types constructed from $A$ (recall that a groupoid is a category whose morphisms are all isomorphisms, and an $\infty$-groupoid is an ``infinite-dimensional generalization'' of a groupoid).
+\end{theorem}
+
+This theorem discovers a new connection between type theory and higher category theory. Note, however, that the theorem is much less interesting if identification types are substituted by the equality types or reflection-free equality types introduced above, since all higher-dimensional structure is trivial; this is one of the main reasons why identification types are the most popular choice among types on equality.
+
+The homotopy-theoretic point of view on type theory, which creates the currently active field of homotopy type theory, interprets:
+
+\begin{itemize}
+\item Types as certain \emph{topological spaces};
+\item Elements as \emph{points} in a topological space;
+\item Functions as continuous maps between topological spaces;
+\item Terms of identification types as \emph{paths} between points. 
+\end{itemize}
+
+We can justify the rules of identification types by the homotopy-theoretic interpretation because any path can be continuously transformed into a trivial path or reflexivity.
+
+\printbibliography
+
+\end{document}
