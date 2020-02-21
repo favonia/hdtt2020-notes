@@ -115,7 +115,7 @@
 \NewDocumentCommand{\dfuntype}{sggg}{\IfValueTF{#2}{\prod\limits_{\IfBooleanTF{#1}{\parens{#2{:}#3}}{#2{:}#3}}#4}{\prod}}
 % \dfuntype*{x}{A}{B} adds the parentheses around 'x:A'
 \NewDocumentCommand{\funtype}{gg}{\IfValueTF{#1}{#1\to#2}{\mathbin{\to}}}
-\NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1:#2}.#3}{\lambda#1.#3}}{\lambda}}
+\NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1{:}#2}.#3}{\lambda#1.#3}}{\lambda}}
 \NewDocumentCommand{\app}{mm}{#1\;#2}
 \NewDocumentCommand{\nattype}{}{\varmathbb{N}}
 \NewDocumentCommand{\idtype}{ggg}{\IfValueTF{#3}{\mathtt{Id}_{#1}\parens{#2; #3}}{\IfValueTF{#1}{\mathtt{Id}\parens{#1; #2}}{\mathtt{Id}}}}

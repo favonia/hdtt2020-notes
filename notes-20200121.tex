@@ -442,11 +442,11 @@ One important principle is the harmony between the answers to \textbf{Question (
 
 \NewDocumentCommand{\alianpair}{}{\bigcirc}
 
-The principle of harmony is important because it \emph{often} (not as a mathematical theorem yet) implies that everything eventually reduces. For example, one can show that any pair (without free variables) will eventually reduce to a term of the form $\pair{M}{N}$, and thus a projection out of the pair will eventually be resolved, using the answers to \textbf{Question (4)} (computations). If we introduced a new form of pair, $\alianpair$, to break the harmony:
+The principle of harmony is important because it \emph{often} (not as a mathematical theorem yet) implies that everything eventually reduces to some canonical form if it does not have free variables. For example, one can show that any pair (without free variables) will eventually reduce to a term of the form $\pair{M}{N}$, and thus a projection out of the pair will eventually be resolved successfully, using the answers to \textbf{Question (4)} (computations). Suppose, as a counter example, we introduced a new form of pair, $\alianpair$:
 \begin{prooftree*}
-  \infer0{\oftype{\alianpair}{\funtype{A}{B}}}
+  \infer0{\oftype{\alianpair}{\pairtype{A}{B}}}
 \end{prooftree*}
-Then, the projections $\pairfst{\alianpair}$ and $\pairsnd{\alianpair}$ would be stuck. This shows why harmony is a necessary condition of the global property that everything reduces. In many cases, it is a sufficient condition, too.
+This new rule will break the harmony because the projections $\pairfst{\alianpair}$ and $\pairsnd{\alianpair}$ would be stuck. Thus, the harmony is a necessary condition of the global property that everything reduces. In many cases, the harmony of all types is a sufficient condition as well..
 
 \printbibliography
 
