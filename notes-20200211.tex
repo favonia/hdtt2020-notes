@@ -135,7 +135,7 @@ In this sense, equality types and judgmental equality are equivalent. Formally, 
 \end{prooftree*}
 
 \subsection{Reflection-Free Equality Types}
-A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict principle of uniqueness of identity proofs (UIP):
+A variant of equality types is reflection-free equality types \cite{sterling_et_al:LIPIcs:2019:10538}. They are intended to obtain the best parts of identification types and (ordinary) equality types. Reflection-free equality types are obtained from equality types by replacing the equality reflection rule by the following strict version of the principle of uniqueness of identity proofs (UIP):
 
 \begin{prooftree*}
 	\hypo{\oftype{\ctx}{p}{\mathtt{Eq}_A\parens{M; N}}}
@@ -144,15 +144,15 @@ A variant of equality types is reflection-free equality types \cite{sterling_et_
 \end{prooftree*}
 
 That is, UIP states that there is at most one term of a reflection-free equality type.
-Note that the principle is called \emph{strict} because the equality between terms of the same reflection-free equality type in the conclusion is judgmental. 
+Note that the principle is called \emph{strict} because the equality between terms of the same reflection-free equality type in the conclusion is judgmental.
 
 \subsection{Identification Types with UIP}
 
-We can also extend identification types with UIP, or alternatively Axiom K. Axiom K is equivalent to UIP in the sense that either of the two is derivable from the other; see section 7.2 of \cite{hott-as:book} for the details. 
+We can also extend identification types with UIP, or alternatively Axiom K. Axiom K is equivalent to UIP in the sense that either of the two is derivable from the other; see section 7.2 of \cite{hott-as:book} for the details.
 
-\section{The $\infty$-Groupoid Structure of Types}
+\section{The \texorpdfstring{$\infty$}{infinity}-Groupoid Structure of Types}
 
-\begin{theorem}
+\begin{theorem}[\citet{van-den-berg-garner:2011}\footnote{Simultaneously, \citet{lumsdaine:2010} showed a similar result, exhibiting an $\infty$-category structure on each type rather than the full $\infty$-groupoid structure.}]
 Each type $A$ has the structure of an $\infty$-groupoid induced by the identification types constructed from $A$ (recall that a groupoid is a category whose morphisms are all isomorphisms, and an $\infty$-groupoid is an ``infinite-dimensional generalization'' of a groupoid).
 \end{theorem}
 
@@ -164,7 +164,7 @@ The homotopy-theoretic point of view on type theory, which creates the currently
 \item Types as certain \emph{topological spaces};
 \item Elements as \emph{points} in a topological space;
 \item Functions as continuous maps between topological spaces;
-\item Terms of identification types as \emph{paths} between points. 
+\item Terms of identification types as \emph{paths} between points.
 \end{itemize}
 
 We can justify the rules of identification types by the homotopy-theoretic interpretation because any path can be continuously transformed into a trivial path or reflexivity.
