@@ -1,0 +1,248 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+%\usepackage{newpxmath}
+%\usepackage{newpxtext}
+\usepackage{amscd}
+\usepackage{tikz-cd}
+\usepackage{environ}
+\usepackage{multicol}
+\setlength{\columnsep}{-1cm}
+
+% Defining the Example environment
+\everymath{\displaystyle}
+\theoremstyle{definition}
+\newtheorem{example}[theorem]{Example}
+
+% Defining the commutative diagram environment
+\NewEnviron{cd}[1][small]{%
+ \begin{center}\begin{tikzcd}[ampersand replacement=\&, column sep=#1, row sep=large, column sep=large]
+  \BODY
+ \end{tikzcd}\end{center}\ignorespacesafterend}
+
+\NewDocumentCommand{\C}{}{\mathcal{C}}
+\NewDocumentCommand{\op}{}{\mathrm{op}}
+\NewDocumentCommand{\id}{}{\mathrm{id}}
+\NewDocumentCommand{\ob}{m}{\mathrm{Ob}(#1)}
+\NewDocumentCommand{\mor}{m}{\mathrm{Mor}(#1)}
+\RenewDocumentCommand{\hom}{mm}{\mathrm{hom}(#1, #2)}
+% \NewDocumentCommand{\colim[2]}{}{\lim_{\overrightarrow{#2}}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Mahrud}
+\date{January 30, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Intuition}
+
+Before reading the definitions, it helps to have the following picture in mind:
+you are Robin Hood, the folklore outlaw, and you are traveling in the Sherwood Forest with your bow in hand and a quiver\footnote{A quiver is an archer's portable case for holding arrows.} full of arrows on your shoulder when you fall off the horse and the arrows spread around. Amazed, you notice that there is an object located at each endpoint of every arrow.
+
+\section{Category Theory}
+
+A \textit{category} $\C$ is a given by a collection of objects $x,y\in\ob\C$ and a collection of morphisms $\hom{x}{y}\subset\mor{\C}$ with the following properties:
+
+\begin{enumerate}
+\item for each object $x$, an \textit{identity morphism} $\id_x\in\hom{x}{x}$;
+\item for each triple of objects $x,y,z$ a \textit{composition} function:
+  \[ \circ:\hom{y}{z} \times \hom{x}{y} \to \hom{x}{z} \text{ given by } (f,g) \mapsto g\circ f \]
+  such that:
+  \begin{enumerate}
+  \item composition is \textit{associative}:
+    \[ (f\circ g)\circ h = f\circ(g\circ h); \]
+  \item composition satisfies the \textit{unit laws}: $\forall f\in\hom{x}{y}$ we have
+    \[ \id_y \circ f = f = f \circ \id_x . \]
+  \end{enumerate}
+\end{enumerate}
+
+\subsubsection{Example from Homework}
+
+We saw in the first homework handout that given a predicate logic theory we have the notion of a partial order, or \textit{poset} among formulas by defining:
+\[ A \preceq B \text{ if and only if } A \vdash B. \]
+
+In the same vein, (closed) types form a poset as follows:
+\[ A \preceq B \text{ if and only if there is } x.M \text{ such that } x{:}A \vdash \oftype{M}{B} \text{ is derivable}. \]
+
+A category is in some sense a poset with two relaxations:
+\begin{itemize}
+\item there can be more than one morphism $A\to B$;
+\item if there is a morphism $A\to B$ and $B\to A$, $A$ and $B$ may not be equal\footnote{TODO: formalize this.}.
+\end{itemize}
+
+In other words, given a poset structure on a set $S$, we may define a category as follows:
+\[ \ob\C:= S \quad \text{and} \quad A \preceq B \text{ if and only if } \hom{A}{B} \text{ is nonempty}. \]
+
+\subsection{The Opposite Category and ``co-''}
+
+Observe that if we flip the direction of every ``arrow'' in a category $\C$, all requirements of the definition are still satisfied. This leads to a notion of the \textit{opposite category $\C^\op$}. This concept is very important in certain areas of mathematics such as \textit{algebraic geometry} where the category of \textit{affine schemes} $\mathcal{A}f\!f$ is equivalent\footnote{See \citetitle[\S9.4]{hott-as:book} for the definition of \textit{equivalence of categories}} to the opposite category of the category of commutative rings $\mathcal{CR}ing$.
+
+Even within a category, we can often find pairs of diagrams where the only difference is that each arrow is reversed. The prefix ``co-'' signals that the object satisfies certain properties if the arrows were reversed.
+
+\begin{example}
+  For a morphism $f\in\hom{A}{B}$, we call $A$ the \textit{domain} and $B$ the \textit{\textbf{co}domain} of $f$. Note that
+  if the direction of $f$ is reverse, the domain and codomain switch roles.
+\end{example}
+
+\subsubsection{Initial and Terminal Objects}
+
+If $x\in\ob\C$ is an object such that for every object $y$ in the category there exists a unique morphism $x\to y$, we call
+$x$ \textit{\textbf{the} initial object of $\C$}.
+
+Similarly, if $y\in\ob\C$ has the property that for every object $x$ in the category there exists a unique morphism $y\to x$,
+we call $y$ \textit{\textbf{the} terminal object of $\C$}.
+
+\begin{example}
+  The empty set is the unique initial object in the category of sets, while every singleton $\{x\}$ is a terminal object.
+\end{example}
+
+\begin{example}
+  The ring of integers $\mathbb Z$ is the initial object in the category of rings with a unit, while the zero ring (where $0=1$) is the terminal object.
+\end{example}
+
+\begin{example}
+  In the category of groups, modules, and vector spaces, the zero object (e.g., trivial group, or a zero dimensional vector space) is both the initial and terminal object.
+\end{example}
+
+As an observation, note that in the opposite category, the roles of initial and terminal objects are reversed.
+
+\section{Universal Constructions}
+
+By now it should be clear the role that morphisms play in category theory. To emphasize this importance, in the next few sections we will define various named objects based on their \textit{universal properties}. A universal property is a property of an object in the category that characterizes that object up to a \textit{unique isomorphism}; i.e., the objects are indistinguishable within the category. Other examples of common universal properties include:
+\textit{tensor product}, \textit{inverse limit and direct limit}, etc.
+
+\subsection{Product and Coproduct}
+
+
+TODO
+
+\break
+\subsection{Pullback and Pushout}
+
+\begin{multicols}{2}
+  Given morphisms $f\in\hom{B}{D}$ and $g\in\hom{C}{D}$ with common codomain $D$, we can define the \textit{pullback} to be the object $A$ and morphisms $i\in\hom{A}{C},j\in\hom{A}{B}$ such that the diagram commutes.
+  \columnbreak
+  \begin{cd}
+    \& A \ar[r, "i"] \ar[d, "j"] \& B \ar[d, "f"] \\ 
+    \& C \ar[r, "g"]             \& D
+  \end{cd}
+\end{multicols}
+Formally, the pullback triple $(A, i, j)$ satisfies a universal property:
+
+\begin{multicols}{2}
+  \begin{quotation}
+    Given triple $(M, \psi, \phi)$ for which the diagram commutes, there must exist a unique morphism $h: M\to A$ such that the morphisms $\psi,\phi$ factor through $i,j$:
+    \vspace*{-0.1cm}
+    \[ \phi=j\circ h \quad\text{and}\quad \psi=i\circ h. \]
+    \columnbreak
+    \vspace*{-1.8cm}
+    \begin{cd}
+      M \ar[rrd, bend left=15, "\psi"] \ar[rd, dotted, "\exists !h" description] \ar[rdd, bend right=15, "\phi"'] 
+      \& \& \& \\
+      \& A \ar[r, "i"] \ar[d, "j"]  \& B \ar[d, "f"] \\ 
+      \& C \ar[r, "g"]                 \& D
+    \end{cd}
+  \end{quotation}
+\end{multicols}
+
+By inverting the arrows in the diagrams above we arrive at a dual notion:
+
+\begin{multicols}{2}
+  Given morphisms $f\in\hom{D}{B}$ and $g\in\hom{D}{C}$ with common domain $D$, we can define the \textit{pushback} to be the object $A$ and morphisms $i\in\hom{C}{A},j\in\hom{B}{A}$ such that the diagram commutes.
+  \columnbreak
+  \begin{cd}
+    \& D \ar[r, "f"] \ar[d, "g"] \& B \ar[d, "i"] \\ 
+    \& C \ar[r, "j"]             \& A
+  \end{cd}
+\end{multicols}
+The universal property of the pushback triple $(A, i, j)$ is similar:
+
+\begin{multicols}{2}
+  \begin{quotation}
+    Given triple $(M, \psi, \phi)$ for which the diagram commutes, there must exist a unique morphism $h: A\to M$ such that the morphisms $\psi,\phi$ factor through $i,j$:
+    \vspace*{-0.1cm}
+    \[ \phi=h\circ j \quad\text{and}\quad \psi=h\circ i. \]
+    \columnbreak
+    \vspace*{-0.5in}
+    \begin{cd}
+      D \ar[r, "f"] \ar[d, "g"]                     \& B \ar[d, "i"] \ar[rdd, bend left=15, "\psi"] \& \\ 
+      C \ar[r, "j"] \ar[rrd, bend right=15, "\phi"] \& A \ar[rd, dotted, "\exists !h" description]  \& \\
+      \& \& M
+    \end{cd}
+  \end{quotation}
+\end{multicols}
+
+\break
+\subsection{Kernels and Cokernels}
+
+Here is an important application of pullbacks and pushbacks in categories with an initial and terminal object $0\in\ob\C$:
+
+\begin{quotation}
+  A categorical \textit{kernel} of $g\in\hom{B}{C}$ is a pullback:
+  \vspace{-0.1in}
+  \begin{cd}
+    K \ar[r] \ar[d, "k"]  \& 0 \ar[d] \\ 
+    B \ar[r, "g"]            \& C
+  \end{cd}
+  In particular, $k$ is a \textit{monomorphism}:
+  \[ k\circ f_1=k\circ f_2 \quad \text{for} \quad f_1,f_2\in\C(J,K) \quad \text{implies} \quad f_1=f_2. \]
+
+  \iffalse
+  Consider the diagram:
+  \vspace{-0.3in}
+  \begin{cd}
+    J \ar[rrd, bend left=15, "i"] \ar[rd, dotted, "\exists !h" description] \ar[rdd, bend right=15, "j"'] \& \& \& \\
+    \& K' \ar[r, "k'"] \ar[d] \& K \ar[r] \ar[d, "k"]  \& 0 \ar[d, "\iota"] \\ 
+    \& 0  \ar[r, "\iota"]     \& B \ar[r, "g"]         \& C
+  \end{cd}
+  % 
+  Where $\iota$ is inclusion and $K'$ is the kernel of $k:K\to B$; i.e., left square is a pullback. In particular, by 
+  Lemma 1 above, the outer triangle is a pullback. That is to say, $K'$ is the kernel of $\iota:0\to C$, which is 
+  tautologically a monomorphism, therefore $K'=0$. Now, let $i=f_1-f_2$ and $j=k\circ f_1-k\circ f_2=0$, then since 
+  $k\circ i=\iota\circ j$, we get a unique morphism $h:J\to K'$ s.t. $i=k'\circ h$, which means $i$ factors through 
+  $K'=0$, hence $i=f_1-f_2=0$.\qed
+  \fi
+\end{quotation}
+
+In linear algebra, the kernel object for the morphism $g$ is denoted $\ker(g)$. The monomorphism $k$ above can hint at the definition of an \textit{injective map}.
+
+The dual notion is not as common in linear algebra, but is commonly used in abstract algebra:
+
+\begin{quotation}
+  A categorical cokernel of $g\in\hom{C}{B}$ is a pullback:
+  \vspace{-0.1in}
+  \begin{cd}
+    C \ar[r, "g"] \ar[d] \& B \ar[d, "h"] \\
+    0 \ar[r]             \& N
+  \end{cd}
+  In particular, $h$ is an \textit{epimorphism}:
+  \[ f_1\circ h=f_2\circ h \quad \text{for} \quad f_1,f_2\in\C(N,T) \quad \text{implies} \quad f_1=f_2. \]
+\end{quotation}
+
+In homological algebra, the cokernel object associated to the morphism $g$ is denoted $\mathrm{coker}(g)$.
+Similar to before, the epimorphism $h$ can hint at the definition of a \textit{surjective map}.
+
+\section{Functors and Natural Transformations}
+
+% TODO: functor, natural transformation, 
+\subsection{Adjunctions}
+
+% TODO: left and right adjoint
+\subsection{Equivalences}
+
+% TODO: lemma 9.5.3
+
+% Yoneda lemma? representable?
+
+% Example from Basic Homotopy Theory?
+
+% Eilenberg–Steenrod axioms
+% Homotopy: The Eilenberg–Steenrod axioms apply to a sequence of functors {\displaystyle H_{n}}H_{n} from the category of pairs {\displaystyle (X,A)}(X,A) of topological spaces to the category of abelian groups, together with a natural transformation {\displaystyle \partial \colon H_{i}(X,A)\to H_{i-1}(A)}{\displaystyle \partial \colon H_{i}(X,A)\to H_{i-1}(A)} called the boundary map (here {\displaystyle H_{i-1}(A)}{\displaystyle H_{i-1}(A)} is a shorthand for {\displaystyle H_{i-1}(A,\emptyset )}{\displaystyle H_{i-1}(A,\emptyset )} . The axioms are:
+
+% Homotopy: Homotopic maps induce the same map in homology. That is, if {\displaystyle g\colon (X,A)\rightarrow (Y,B)}{\displaystyle g\colon (X,A)\rightarrow (Y,B)} is homotopic to {\displaystyle h\colon (X,A)\rightarrow (Y,B)}{\displaystyle h\colon (X,A)\rightarrow (Y,B)}, then their induced homomorphisms are the same.
+
+\nocite{ctc-as:book}
+\printbibliography
+
+\end{document}
