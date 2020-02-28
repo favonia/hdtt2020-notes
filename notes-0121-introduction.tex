@@ -61,14 +61,14 @@ The collection of available variables form the \emph{context}.
 Formally, a context is a list of hypotheses, i.e., variables annotated with their types,%
 \footnote{We will introduce new forms of hypotheses in the later part of this course.}
 \[
-  x_1{:}A_1, x_1{:}A_2, \cdots, x_n{:}A_n
+  x_1{:}A_1, x_2{:}A_2, \ldots, x_n{:}A_n
 \]
 which says variable $x_i$ is of type $A_i$.
 A hypothetical judgment takes the following form:
 \[
-  \entails{x_1{:}A_1, x_1{:}A_2, \cdots, x_n{:}A_n}{\JJ}
+  \entails{x_1{:}A_1, x_2{:}A_2, \ldots, x_n{:}A_n}{\JJ}
 \]
-which says $\JJ$ holds under the hypotheses $x_1{:}A_1, x_1{:}A_2, \cdots, x_n{:}A_n$.
+which says $\JJ$ holds under the hypotheses $x_1{:}A_1, x_2{:}A_2, \ldots, x_n{:}A_n$.
 As a special case, $\emptyctx$ is the empty context and
 \[
   \entails{\emptyctx}{\JJ}
@@ -106,7 +106,7 @@ separated by a horizontal line as follows:
     \infer4[(rule name)]{\JJ}
   \end{prooftree}
 \]
-It means that, if the premises $\JJ_1, \JJ_2, \cdots, \JJ_n$ are valid, then the conclusion $\JJ$ is valid, too.
+It means that, if the premises $\JJ_1, \JJ_2, \ldots, \JJ_n$ are valid, then the conclusion $\JJ$ is valid, too.
 If we manage to prove a judgment $\JJ$ using the inference rules in a type theory,
 the history of the reasoning may be represented as a tree, which is called \emph{derivation}.
 For example, a possible derivation is as follows:
@@ -184,7 +184,7 @@ In addition to the variable rule, there are several rules that are common in a t
   \begin{varwidth}{\textwidth}
     \begin{prooftree}
       \hypo{\entails{\ctx,x{:}A,y{:}A,\Delta}{\JJ}}
-      \infer1[(contraction)]{\entails{\ctx,z{:}A,\Delta}{\JJ\subst{z,z}{x,y}}}
+      \infer1[(contraction)]{\entails{\ctx,z{:}A,\Delta\subst{z}{x}\subst{z}{y}}{\JJ\subst{z}{x}\subst{z}{y}}}
     \end{prooftree}
   \end{varwidth}
   \and
@@ -206,8 +206,8 @@ In addition to the variable rule, there are several rules that are common in a t
 \end{mathpar}
 These rules are either part of the definition of a type theory
 or are \emph{admissible}, meaning that the theory is carefully arranged so that
-the rules are are \emph{provable} in the following sense.
-\begin{definition}[admissible rules]
+the rules are \emph{provable} in the following sense.
+\begin{definition}[Admissible rule]
   An inference rule
   \[
     \begin{prooftree}
@@ -218,7 +218,7 @@ the rules are are \emph{provable} in the following sense.
       \infer4{\JJ}
     \end{prooftree}
   \]
-  in a theory $\TT$ if
+  in a theory $\TT$ is \emph{admissible} if
   whenever there are derivations of the judgments $\JJ_1$, $\JJ_2$, \ldots, $\JJ_n$,
   there is a derivation of the judgment $\JJ$.
 \end{definition}
@@ -438,7 +438,7 @@ For each type, we are going to answer the above five questions using judgments.
 
 \section{Principle of Harmony}
 
-One important principle is the harmony between the answers to \textbf{Question (2)} (introductions) and \textbf{Question (3)} (eliminations). They need to satisfy the law of conservation of knowledge, like the law of conservation of energy in physics. The data you put in using the answers in \textbf{Question (2)} must equal to what you can learn via the answers to \textbf{Question (3).} For example, there are two projections from a pair, and thus it takes two components to make a pair. There are two (canonical) ways to make an element of a disjoint sum type, and thus there are two branches in $\sumcase$. There are no projection from an element of the unit type, and thus it takes nothing to construct an element of that type.
+One important principle is the harmony between the answers to \textbf{Question (2)} (introductions) and \textbf{Question (3)} (eliminations). They need to satisfy the law of conservation of knowledge, like the law of conservation of energy in physics. The data you put in using the answers in \textbf{Question (2)} must equal to what you can learn via the answers to \textbf{Question (3).} For example, there are two projections from a pair, and thus it takes two components to make a pair. There are two (canonical) ways to make an element of a disjoint sum type, and thus there are two branches in $\sumcase$. There are no projections from an element of the unit type, and thus it takes nothing to construct an element of that type.
 
 \NewDocumentCommand{\alianpair}{}{\bigcirc}
 
@@ -446,7 +446,7 @@ The principle of harmony is important because it \emph{often} (not as a mathemat
 \begin{prooftree*}
   \infer0{\oftype{\alianpair}{\pairtype{A}{B}}}
 \end{prooftree*}
-This new rule will break the harmony because the projections $\pairfst{\alianpair}$ and $\pairsnd{\alianpair}$ would be stuck. Thus, the harmony is a necessary condition of the global property that everything reduces. In many cases, the harmony of all types is a sufficient condition as well..
+This new rule will break the harmony because the projections $\pairfst{\alianpair}$ and $\pairsnd{\alianpair}$ would be stuck. Thus, the harmony is a necessary condition of the global property that everything reduces. In many cases, the harmony of all types is a sufficient condition as well.
 
 \printbibliography
 
