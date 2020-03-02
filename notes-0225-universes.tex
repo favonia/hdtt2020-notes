@@ -1,0 +1,272 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+
+\newcommand{\U}{\ensuremath{\mathcal{U}}}
+
+\newcommand{\wf}[1]{\ensuremath{\textnormal{well-founded}(#1)}}
+\newcommand{\isequiv}[1]{\ensuremath{\textnormal{is-equiv}(#1)}}
+\newcommand{\qinv}[1]{\ensuremath{\textnormal{qinv}(#1)}}
+\newcommand{\isprop}[1]{\ensuremath{\textnormal{is-prop}(#1)}}
+\newcommand{\iscontr}[1]{\ensuremath{\textnormal{is-contr}(#1)}}
+\newcommand{\ishae}[1]{\ensuremath{\textnormal{is-hae}(#1)}}
+\newcommand{\ap}{\textnormal{ap}}
+\newcommand{\idtoequiv}{\textnormal{idtoequiv}}
+\newcommand{\funapp}{\textnormal{funapp}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Dawn Michaelson, Jack Perisich}
+\date{February 25, 2020}
+
+\begin{document}
+
+\maketitle
+
+
+
+
+
+\section{Universe}
+To internalize the $\istype{\Gamma}{A}$ judgment, we introduce the
+universe type \U.  This can be viewed as the ``type of types''.  We
+replace the original judgment with $\oftype{\Gamma}{A}{\U}$.
+%
+We can make this replacement in all our existing rules.  For example,
+we originally had the following rule for dependent function types:
+\begin{prooftree*}
+  \hypo{\istype{\Gamma}{A}}
+  \hypo{\istype{\Gamma, x:A}{B}}
+  \infer2{\istype{\Gamma}{\dfuntype{x}{A}{B}}}
+\end{prooftree*}
+We can replace each judgment with a judgment that the given type has
+the type of the universe, giving us a new rule:
+\begin{prooftree*}
+  \hypo{\oftype{\Gamma}{A}{\U}}
+  \hypo{\oftype{\Gamma, x:A}{B}{\U}}
+  \infer2{\oftype{\Gamma}{\dfuntype{x}{A}{B}}{\U}}
+\end{prooftree*}
+Doing this in all rules gives a system where we do not need the
+original is-type judgment.
+
+
+
+
+
+\section{Inconsistency}
+Because \U{} is a type, we should have a rule:
+\begin{prooftree*}
+  \infer0{\oftype{\Gamma}{\U}{\U}}
+\end{prooftree*}
+With this rule, we can prove inconsistency, meaning a closed term of
+the empty type.  This is the \textbf{Burali-Forti Paradox}.
+\begin{enumerate}
+\item Consider types with a transitive, well-founded order.  We will
+  write this as \wf{A}.  This means that the type has an induction
+  principle and a minimal element.
+\item We define a type $W := \dpairtype{A}{\U}{\wf{A}}$.  This is a
+  type which contains all well-founded types.
+\item This type $W$ is well-founded with embedding as the relation.
+  \begin{itemize}
+  \item An embedding is an order-preserving function with a strict
+    upper bound.  If we have types with ordering relations $(A, <_A)$
+    and $(B, <_B)$ with an embedding $\oftype{f}{A \rightarrow B}$,
+    $f$ will map ordered elements from $A$ to the same order in $B$,
+    and there is some $b$ such that $f(a) <_B b$ for any $a$.
+  \end{itemize}
+  We can prove an embedding is transitive and well-founded.  Then we
+  have $\oftype{(W, \textnormal{embedding})}{W}$.
+\item Every well-founded type $(A, <_A)$ can be embedded into $W$.  We
+  can define a map $a \mapsto \dpairtype{a'}{A}{a' <_A a}$.
+\item Because of the previous point, $W$ can then be embedded into
+  itself, yielding $W <_W W$.  This contradicts that embedding is
+  well-founded.
+\end{enumerate}
+This was originally done in type theory by Girard.  It was later
+improved by Coquand and Hurken.
+
+
+
+
+
+\section{Repairing Universes}
+To remove this inconsistency, the universe \U{} becomes a hierarchy of
+universes $\U_0, \U_1, \U_2, ...$.  We have two rules for these
+universes:
+\begin{mathpar}
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \infer0{\oftype{\Gamma}{\U_i}{\U_{i+1}}}
+    \end{prooftree}
+  \end{varwidth}
+  \and
+  \begin{varwidth}{\textwidth}
+    \begin{prooftree}
+      \hypo{\oftype{\Gamma}{A}{\U_i}}
+      \infer1{\oftype{\Gamma}{A}{\U_{i+1}}}
+    \end{prooftree}
+  \end{varwidth}
+\end{mathpar}
+A universe is contained in the next universe above it, and the
+hierarchy is cumulative, so any type is contained in all the universes
+above it.
+
+How does this work when a rule has multiple premises judging that
+types are members of some universe?  Above, before introducing a
+universe hierarchy, we had a rule for dependent function types:
+\begin{prooftree*}
+  \hypo{\oftype{\Gamma}{A}{\U}}
+  \hypo{\oftype{\Gamma, x:A}{B}{\U}}
+  \infer2{\oftype{\Gamma}{\dfuntype{x}{A}{B}}{\U}}
+\end{prooftree*}
+There are two options for writing such a rule in the hierarchy of
+universes.  The first is to take the least upper bound of the indices
+of the premises ($i \sqcup j$) as the index of the conclusion:
+\begin{prooftree*}
+  \hypo{\oftype{\Gamma}{A}{\U_i}}
+  \hypo{\oftype{\Gamma, x:A}{B}{\U_j}}
+  \infer2{\oftype{\Gamma}{\dfuntype{x}{A}{B}}{\U_{i \sqcup j}}}
+\end{prooftree*}
+The second is to have the same index for both premises and the
+conclusion:
+\begin{prooftree*}
+  \hypo{\oftype{\Gamma}{A}{\U_i}}
+  \hypo{\oftype{\Gamma, x:A}{B}{\U_i}}
+  \infer2{\oftype{\Gamma}{\dfuntype{x}{A}{B}}{\U_i}}
+\end{prooftree*}
+Because we have the rule for raising a type from one universe to the
+next, we can raise one premise to match the other, then use this rule,
+so neither rule is more powerful, and it is simply a stylistic
+choice.
+
+With this hierarchy and this principle for creating judgments of types
+being in universes, we are unable to embed $W$ in itself, only in a
+version of $W$ for a higher universe.
+%
+This is because the definition of the type $W$ requires the following
+rule for placing it in a universe, once we have the universe
+hierarchy:
+\begin{prooftree*}
+  \hypo{\oftype{\Gamma}{\U_i}{\U_j}}
+  \hypo{\oftype{\Gamma, A:\U_i}{\wf{A}}{\U_j}}
+  \infer2{\oftype{\Gamma}{\dpairtype{A}{\U_i}{\wf{A}}}{\U_j}}
+\end{prooftree*}
+Because $\U_i$, the type of $A$, is an element of $\U_j$, $i<j$, and
+this dependent pair type cannot be an element of itself.
+%
+Because of this, we cannot recreate the Burali-Forti Paradox with
+these rules.
+
+In practice, proofs which do not distinguish between universes in the
+hierarchy, acting as though the judgment $\oftype{\Gamma}{\U}{\U}$
+holds, can usually have universe levels inserted consistently.  For
+this reason, indices are often not shown when they do not affect the
+proof.
+
+
+
+
+
+\section{Univalence Principle}
+The univalence principle is roughly that equivalent things should be
+identified.  A good approximation of this is:
+\[(A \simeq B) \simeq \idtype{\U}{A}{B}\]
+This requires that we define equivalences $A \simeq B$.  We define
+this as
+\[(A \simeq B) := \dpairtype{f}{A \rightarrow B}{\isequiv{f}}\]
+This, in turn, requires us to give a good definition of $\isequiv{}$.
+
+
+\subsection{Function Equivalence}
+A quasi-inverse of a function $\oftype{f}{A \rightarrow B}$
+($\qinv{f}$) includes
+\begin{itemize}
+\item $\oftype{g}{B \rightarrow A}$
+\item $\oftype{\epsilon}{\dfuntype{y}{B}{\idtype{B}{f(g(y))}{y}}}$
+\item $\oftype{\eta}{\dfuntype{x}{A}{\idtype{A}{g(f(x))}{x}}}$
+\end{itemize}
+This may be formulated as a rather large dependent pair type.
+
+For a good definition of $\isequiv{f}$, we want two things:
+\begin{enumerate}
+\item The definition should be logically equivalent to $\qinv{f}$
+  (either one can be derived given the other)
+\item $\isprop{\isequiv{f}}$ \\
+  This requires that $\isequiv{f}$ has at most one element.  The
+  definition of $\qinv{f}$ fails this requirement.
+\end{enumerate}
+
+We give two possible types to fulfill the requirements on
+$\isequiv{f}$:
+\begin{enumerate}
+\item Half Adjoint Equivalence ($\ishae{f}$)
+
+  This includes $g$, $\epsilon$, and $\eta$ as in the quasi-inverse,
+  but it also includes a fourth element $\tau$:
+  \[\oftype{\tau}{\dfuntype{x}{A}{\idtype{}{\ap_f(\eta(x))}{\epsilon(f(x))}}}\]
+  This $\tau$ may be thought of as ensuring that $\eta$ and $\epsilon$
+  are coherent in some way.
+
+  It is clear how to derive $\qinv{f}$ given $\ishae{f}$, since we
+  already have the $g$, $\epsilon$, and $\eta$.  The other direction
+  of the equivalence is much more difficult to prove.
+
+  Rather than $\tau$, we could have defined $\tau'$:
+  \[\oftype{\tau'}{\dpairtype{y}{B}{\idtype{}{\eta(g(y))}{\ap_g(\epsilon(y))}}}\]
+  This definition is dual to the definition of $\tau$.  It is the
+  other ``half'' in the name of the type.
+  %
+  If the definition required both $\tau$ and $\tau'$, it would not
+  satisfy the requirement of $\isprop{\isequiv{f}}$, and we would
+  require a further element to show that $\tau$ and $\tau'$ were
+  coherent.
+
+\item $\isequiv{f} := \dfuntype{y}{B}{\iscontr{\dpairtype{x}{A}{\idtype{}{f(x)}{y}}}}$
+
+  The inner dependent pair type is defining the pre-image of $y$ (in
+  homotopy theory, this is the ``fiber over $y$'' or that ``all fibers
+  are contractible'').  There is only one element in the pre-image,
+  which gives an inverse function.
+\end{enumerate}
+Both of these definitions are acceptable.  In Agda, we prefer half
+adjoint equivalence because it is easier to use.
+
+A difficulty is that proving $\isprop{\isequiv{f}}$ for many
+definitions requires function extensionality, which cannot be defined
+without univalence.  We choose a definition of $\isequiv$ and use it
+to define univalence, then prove $\isprop$ for it assuming univalence.
+
+
+\subsection{Univalence}
+A precise formulation of univalence:
+\begin{itemize}
+\item Define $\oftype{\idtoequiv}{\idtype{\U}{A}{B} \rightarrow A \simeq B}$ \\
+  Axiom:  $\isequiv{\idtoequiv}$ \\
+  $\idtoequiv := \lambda p.\idJ{A}{\textnormal{a proof of \isequiv{id_A}}}{p}$
+
+\item (Strong) Function Extensionality \\
+  Define $\oftype{\funapp}{\idtype{f}{g}} \rightarrow \dfuntype{x}{A}{\idtype{f(x)}{g(x)}}$ \\
+  Axiom:  $\isequiv{\funapp}$
+\end{itemize}
+
+Some points to note:
+\begin{enumerate}
+\item By including these two axioms, we are breaking harmony.  This is
+  fixed by cubical type theory.
+\item Univalence can be viewed as an extensionality principle for
+  universes.
+\item Univalence implies function extensionality, so we don't need the
+  axiom for $\funapp$.
+\item Univalence implies $\lnot\textnormal{axiom k}$ and
+  $\lnot\textnormal{LEM}$.  If we had the law of the excluded
+  middle, that would imply that every type has decidable equality,
+  which would in turn imply that every type is a set.  This is a
+  contradiction, since \U{} is not a set.
+\end{enumerate}
+
+
+
+
+
+\end{document}
+
