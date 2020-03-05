@@ -13,7 +13,7 @@
 \newcommand{\ishae}[1]{\ensuremath{\textnormal{is-hae}(#1)}}
 \newcommand{\ap}{\textnormal{ap}}
 \newcommand{\idtoequiv}{\textnormal{idtoequiv}}
-\newcommand{\funapp}{\textnormal{funapp}}
+\newcommand{\funapp}{\textnormal{happly}}
 
 \title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
 \author{Dawn Michaelson, Jack Perisich}
@@ -62,8 +62,8 @@ With this rule, we can prove inconsistency, meaning a closed term of
 the empty type.  This is the \textbf{Burali-Forti Paradox}.
 \begin{enumerate}
 \item Consider types with a transitive, well-founded order.  We will
-  write this as \wf{A}.  This means that the type has an induction
-  principle and a minimal element.
+  write this as \wf{A}.  This means that the type has a minimal
+  element in any non-empty subset.
 \item We define a type $W := \dpairtype{A}{\U}{\wf{A}}$.  This is a
   type which contains all well-founded types.
 \item This type $W$ is well-founded with embedding as the relation.
@@ -82,8 +82,10 @@ the empty type.  This is the \textbf{Burali-Forti Paradox}.
   itself, yielding $W <_W W$.  This contradicts that embedding is
   well-founded.
 \end{enumerate}
-This was originally done in type theory by Girard.  It was later
-improved by Coquand and Hurken.
+This was originally done in type theory by
+Girard~\cite{girard_paradox_girard}.  It was later improved by
+Coquand~\cite{girard_paradox_coquand} and
+Hurkens~\cite{girard_paradox_hurkens}.
 
 
 
@@ -232,7 +234,7 @@ Both of these definitions are acceptable.  In Agda, we prefer half
 adjoint equivalence because it is easier to use.
 
 A difficulty is that proving $\isprop{\isequiv{f}}$ for many
-definitions requires function extensionality, which cannot be defined
+definitions requires function extensionality, which cannot be proved
 without univalence.  We choose a definition of $\isequiv$ and use it
 to define univalence, then prove $\isprop$ for it assuming univalence.
 
@@ -265,7 +267,7 @@ Some points to note:
 \end{enumerate}
 
 
-
+\printbibliography
 
 
 \end{document}
