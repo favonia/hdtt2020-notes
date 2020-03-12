@@ -239,17 +239,21 @@ without univalence.  We choose a definition of $\isequiv$ and use it
 to define univalence, then prove $\isprop$ for it assuming univalence.
 
 
-\subsection{Univalence}
+\subsection{Univalence and Function Extensionality}
 A precise formulation of univalence:
-\begin{itemize}
-\item Define $\oftype{\idtoequiv}{\idtype{\U}{A}{B} \rightarrow A \simeq B}$ \\
-  Axiom:  $\isequiv{\idtoequiv}$ \\
-  $\idtoequiv := \lambda p.\idJ{A}{\textnormal{a proof of \isequiv{id_A}}}{p}$
-
-\item (Strong) Function Extensionality \\
-  Define $\oftype{\funapp}{\idtype{f}{g}} \rightarrow \dfuntype{x}{A}{\idtype{f(x)}{g(x)}}$ \\
-  Axiom:  $\isequiv{\funapp}$
-\end{itemize}
+\begin{tabbing}
+  xxxxx\= \kill
+  \> Define $\oftype{\idtoequiv}{\idtype{\U}{A}{B} \rightarrow A \simeq B}$ \\
+  \> Axiom:  $\isequiv{\idtoequiv}$ \\
+  \> $\idtoequiv := \lambda p.\idJ{A}{\textnormal{a proof of \isequiv{id_A}}}{p}$
+\end{tabbing}
+We define function extensionality as follows, using it to prove $\isprop{\isequiv{}}$.
+\begin{tabbing}
+  xxxxx\= \kill
+  \> (Strong) Function Extensionality \\
+  \> Define $\oftype{\funapp}{\idtype{f}{g}} \rightarrow \dfuntype{x}{A}{\idtype{f(x)}{g(x)}}$ \\
+  \> Axiom:  $\isequiv{\funapp}$
+\end{tabbing}
 
 Some points to note:
 \begin{enumerate}
