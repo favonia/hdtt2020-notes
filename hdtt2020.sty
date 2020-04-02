@@ -97,6 +97,7 @@
 
 \NewDocumentCommand{\unittype}{}{\top}
 \NewDocumentCommand{\unitelem}{}{\diamond}
+\NewDocumentCommand{\booltype}{}{\varmathbb{2}}
 \NewDocumentCommand{\dpairtype}{sggg}{\IfValueTF{#2}{\sum\limits_{\IfBooleanTF{#1}{\parens{#2{:}#3}}{#2{:}#3}}#4}{\sum}}
 % \dpairtype*{x}{A}{B} adds the parentheses around 'x:A'
 \NewDocumentCommand{\pairtype}{gg}{\IfValueTF{#1}{#1\times#2}{\mathbin{\times}}}
