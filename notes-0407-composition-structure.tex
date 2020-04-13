@@ -1,0 +1,212 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+\usepackage{multicol}
+
+\NewDocumentCommand{\circletype}{}{\mathtt{circle}}
+\NewDocumentCommand{\circleloop}{}{\mathtt{loop}}
+\NewDocumentCommand{\hcomp}{}{\mathtt{hcomp}}
+\NewDocumentCommand{\pathconcat}{mm}{\idconcat{#1}{#2}}
+\NewDocumentCommand{\pathrefl}{g}{\mathtt{refl}\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\pathtype}{ggg}{\IfValueTF{#3}{\mathtt{Path}_{#1}\parens{#2; #3}}{\IfValueTF{#1}{\mathtt{Path}\parens{#1; #2}}{\mathtt{Path}}}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Nathan Ringo, Norihiro Yamada}
+\date{April 7, 2020} % Also some Apr1 content for context
+
+\begin{document}
+\maketitle
+
+\section{Homogeneous Composition}
+
+Homogeneous composition involves $n$-cubes with a missing face, which we call a box. The face that is opposite the missing face is the ``cap,'' while the others are simply ``faces.'' The $\hcomp$ operator gives us this missing face from the others.
+
+To make this useful in type theory, we extend this to boxes with multiple missing edges; as long as the cap is present, the other faces can be trivial (i.e. $\idrefl$).
+
+There's also the restriction that this must compose with substition; for example, if you compose a 3-box, and take its diagonal, the result should be judgementally equal to taking the diagonal of the box, and composing the 2-dimensional box.
+
+A variant of this is to allow diagonal faces, however we won't use this in cubical Agda.
+
+\subsection{Usage in Agda}
+
+In this example, we define a 3-dimensional box, with $k$ as the direction of composition, missing the face at $i=0$. We need $\oftype{A}{\univ}$, the type where the composition is happening, as well as $\oftype{M}{A}$, the cap (bottom) of the box. We then define the walls as a mapping from equations on $i$ and $j$ to elements of $A$. (These are referred to as systems, or as $\mathtt{Partial}$ elements, since they define elements for some parts of the type.)
+
+We also need to ensure that the following judgements hold:
+\begin{itemize}
+	\item $\entails{j=0,k=0}{\eqtype{N_1}{M}}$
+	\item $\entails{i=1,k=0}{\eqtype{N_2}{M}}$
+	\item $\entails{j=1,k=0}{\eqtype{N_3}{M}}$
+	\item $\entails{i=1,j=0}{\eqtype{N_2}{N_1}}$
+	\item $\entails{j=1,i=1}{\eqtype{N_3}{N_2}}$
+\end{itemize}
+
+Essentially, these ensure that the faces indeed combine to form a box. The homogeneous composition is then written as e.g. $\oftype{\hcomp^k\,A\,[j=0 \mapsto N_1, i=1 \mapsto N_2, j=1 \mapsto N_3]\,M}{A}$.
+
+\section{Coercion}
+
+Coercion lets us transport an element from one end of an $n$-square to the other end. Note that this is different from a homogeneous composition, since the type changes, while it stays the same in homogeneous composition. Variants of the coercion operator allow diagonals as well, or backwards. Another variant can force part of a line (or, more generally, $n$-cube) to be judgementally equal before and after it is coerced, which we will use in cubical Agda.
+
+\subsection{Usage in Agda}
+
+In this example, we define a 2-dimensional space, with a 1-dimensional cube (i.e., a line) being transported from $j=0$ to $j=1$, with the line along $i=0$ frozen.
+
+We need the type $A$ of the space (which may depend on $j$), and the line $\oftype{M}{A[j\mapsto0]}$. Lastly, we need to ensure that $\entails{i=0}{\eqterm{A}{A[j\mapsto0]}{\univ}}$, ensuring that the freeze is true.
+
+We then write the coercion as $\oftype{\mathtt{transp}^j A (\texttildelow i) M}{A[j\mapsto1]}$. (Note that $\texttildelow i$ is used as the term that should be frozen at $1$; i.e., this represents the equation $\texttildelow i = 1$, and thus $i=0$).
+
+\section{Heterogeneous Composition}
+
+By putting together a variant of each of these, we can get heterogeneous composition. This works similarly to homogeneous composition, but allows the type of the cap to differ from the missing face.
+
+The variant used doesn't matter; redtt and cubical Agda each use different variants, but get univalence, higher inductive types, etc.
+
+\subsection{Usage in Agda}
+
+This is essentially the same as homogeneous composition, but $A$ can depend on $k$. $M$ then has the type $A[k\mapsto0]$, while $\oftype{\mathtt{comp}^k\,A\,[...]\,M}{A[k\mapsto1]}$.
+
+\section{Constraints in Contexts}
+
+In Agda, contexts can contain constraints formed by a boolean algebra with equations setting expressions on $\mathbb{I}$ equal to $0$ or $1$. These expressions are themselves a De Morgan algebra.
+
+There exists a functor from dimension expressions to constraints that sends $r$ to $r=1$. We can transform any constraint $\varphi$ to the form $r=1$ for some $r$.
+% NOTE(remexre): I'm not sure this follows from that functor existing; I think it needs to be strengthened to an equivalence? Or, really, just the functor in the opposite direction.
+For example, $(i=0)\lor(i=1) = (\texttildelow i=1)\lor(i=1) = (\texttildelow i\lor i)=1$.
+
+This lets us specify $\mathtt{transp}$ with $\oftype{r}{\mathbb{I}}$, rather than needing to be able to specify a constraint.
+
+\section{Kan Operators on Familiar Types}
+
+\subsection{Unit}
+
+\begin{multicols}{2}
+	\begin{prooftree*}
+		\hypo{\oftype{M}{\unittype}}
+		\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\unittype}}
+		\infer2{\eqterm{\mathtt{hcomp}^i\,\unittype\,[\varphi\mapsto N]\,M}{M}{\unittype}}
+	\end{prooftree*}
+
+	\begin{prooftree*}
+		\hypo{\oftype{M}{\unittype}}
+		\hypo{\oftype{r}{\mathbb{I}}}
+		\infer2{\eqterm{\mathtt{transp}^i\,\unittype\,r\,M}{M}{\unittype}}
+	\end{prooftree*}
+\end{multicols}
+
+Because of the unit type's simple structure, nothing particularly interesting can happen here.
+
+\subsection{Empty}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\unittype}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\unittype}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\unittype\,[\varphi\mapsto N]\,M}
+	               {M}
+	               {\unittype}}
+\end{prooftree*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\unittype}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\unittype\,r\,M}
+	               {M}
+	               {\unittype}}
+\end{prooftree*}
+
+\subsection{Pi}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\dfuntype{x}{A}{B}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\parens{\dfuntype{x}{A}{B}}\,[\varphi\mapsto N]\,M}
+	               {\lam{x}[A]{\mathtt{hcomp}^i\,B\,[\varphi\mapsto\app{N}{x}]\,\parens{\app{M}{x}}}}
+	               {\dfuntype{x}{A}{B}}}
+\end{prooftree*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\parens{\dfuntype{x}{A}{B}}\,r\,M}
+	               {\lam{x}[A]{\mathtt{transp}^i\,B[x \mapsto \text{\texttt{transp-fill}}^{\texttildelow i}\,A\,r\,x]\,r\,\parens{\app{M}{\parens{\text{\texttt{transp-fill}}^1\,A\,r\,x}}}}}
+	               {\dfuntype{x}{A}{B}}}
+\end{prooftree*}
+
+The intuition here essentially follows from function extensionality: we just need the term to have identical input-output behavior. It's therefore perfectly fine to just ``push the operator in,'' instead operating on $B$.
+
+\subsection{Sigma}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\dpairtype{x}{A}{B}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\parens{\dpairtype{x}{A}{B}}\,[\varphi\mapsto N]\,M}
+	               {\pair{\mathtt{compFst}}{\mathtt{compSnd}}}
+	               {\dpairtype{x}{A}{B}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{compFst} & \defeq \mathtt{hcomp}^i\,A\,[\varphi\mapsto\pairfst{N}]\,\parens{\pairfst{M}} \\
+	\mathtt{compSnd} & \defeq \mathtt{comp}^i\,B\,[\varphi\mapsto\pairsnd{N}, x\mapsto\mathtt{filler}^i]\,\parens{\pairsnd{M}} \\
+	\mathtt{filler}^i & \defeq \mathtt{hfill}^i\,A\,[\varphi\mapsto\pairfst{N}]\,\parens{\pairfst{M}}
+\end{align*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\parens{\dpairtype{x}{A}{B}}\,\varphi\,M}
+	               {\pair{\mathtt{transpFst}}{\mathtt{transpSnd}}}
+	               {\dpairtype{x}{A}{B}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{transpFst} & \defeq \mathtt{transp}^i\,A\,\varphi\,\parens{\pairfst{M}} \\
+	\mathtt{transpSnd} & \defeq \mathtt{transp}^i\,\parens{B[x\mapsto\mathtt{filler}^i]}\,\varphi\,\parens{\pairsnd{M}} \\
+	\mathtt{filler}^i & \defeq \text{\texttt{transp-fill}}^i\,A\,\varphi\,\parens{\pairfst{M}}
+\end{align*}
+
+\subsection{Paths}
+
+\begin{prooftree*}
+	\hypo{\oftype{P}{\pathtype{j.A}{M}{N}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{Q}{\pathtype{j.A}{M}{N}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\pathtype{j.A}{M}{N}\,[\varphi\mapsto Q]\,P}
+	               {\lam{j}{\mathtt{body}}}
+	               {\pathtype{j.A}{M}{N}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{body} & \defeq \mathtt{hcomp}^i\,A\,[\varphi\mapsto Q@j, j=0\mapsto M, j=1\mapsto N]\,\parens{P@j}
+\end{align*}
+
+\begin{prooftree*}
+	\hypo{\oftype{P}{\pathtype{j.A}{M}{N}}}
+	\infer1{\eqterm{\mathtt{transp}^i\,\parens{\pathtype{j.A}{M}{N}}\,\varphi\,P}
+	               {\lam{j}{\mathtt{body}}}
+	               {\pathtype{j.A}{M}{N}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{body} & \defeq \mathtt{comp}^i\,[\varphi\mapsto P@j, j=0\mapsto M, j=1\mapsto N]\,\parens{P@j}
+\end{align*}
+
+\subsection{Positive Types}
+
+Coercion simply ``just works'' for inductive types:
+
+\begin{prooftree*}
+	\hypo{A\,\text{is an inductive type}}
+	\hypo{\oftype{M}{A}}
+	\infer2{\eqterm{\mathtt{transp}^i\,A\,\varphi\,M}{M}{A}}
+\end{prooftree*}
+
+Homogeneous composition, on the other hand, requires a bit of a trick; since $N$ might not be constant (i.e., $N[i\mapsto0]\equiv N[i\mapsto1]$ might not hold). Here, $\mathtt{hcomp}$ adds additional values to the type; since type declarations only define an inductive type that's generated by a certain description, this is acceptable. Furthermore, the new values commute with elimination, which makes these new values aren't really ``stuck terms.''
+
+\printbibliography
+\end{document}
