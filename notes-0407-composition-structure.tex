@@ -3,6 +3,7 @@
 \usepackage{newpxmath}
 \usepackage{newpxtext}
 \usepackage{multicol}
+%\usepackage{bussproof}
 
 \NewDocumentCommand{\circletype}{}{\mathtt{circle}}
 \NewDocumentCommand{\circleloop}{}{\mathtt{loop}}
@@ -18,65 +19,155 @@
 \begin{document}
 \maketitle
 
+In this lecture note, we shall first introduce two operators (on terms) equipped on every type, called \emph{homogeneous composition} and \emph{coercion}, which together ensure that paths can be composed in every type. 
+We shall then see how these two operators are defined along the basic type constructions. 
+
+
 \section{Homogeneous Composition}
+\label{HomogeneousComposition}
+\emph{\bfseries Homogeneous composition} is concerned with an $n$-cube ($n \in \mathbb{N}$) with a missing term or \emph{\bfseries face}; we call such an $n$-cube a \emph{\bfseries box}, and the face of a box that is on the side opposite to the missing face the \emph{\bfseries cap}. 
+Homogenous composition is then what gives us the missing face of a box from the cap.
 
-Homogeneous composition involves $n$-cubes with a missing face, which we call a box. The face that is opposite the missing face is the ``cap,'' while the others are simply ``faces.'' The $\hcomp$ operator gives us this missing face from the others.
+%To make homogeneous composition useful in type theory, we extend it to boxes with multiple missing faces. 
+Let us remark that as long as the cap of a box is present we can apply homogeneous composition to the box \emph{even if the other faces are absent}.
+Also, to apply homogeneous composition, the faces of a box must share the \emph{same} type; this point explains the terminology \emph{homogeneous} composition. 
 
-To make this useful in type theory, we extend this to boxes with multiple missing edges; as long as the cap is present, the other faces can be trivial (i.e. $\idrefl$).
+There is an important condition: Homogenous composition must commute with substitution. 
+It is just an instance of the general principle of type theory that every constructions must commute with substitution. 
+%For example, if you compose a 3-box, and take its diagonal, the result should be judgementally equal to taking the diagonal of the box, and composing the 2-dimensional box.
 
-There's also the restriction that this must compose with substition; for example, if you compose a 3-box, and take its diagonal, the result should be judgementally equal to taking the diagonal of the box, and composing the 2-dimensional box.
+Finally, there is a variant of homogeneous composition that allows \emph{diagonal faces}.
+However, we do not use this variant in cubical Agda.
 
-A variant of this is to allow diagonal faces, however we won't use this in cubical Agda.
 
-\subsection{Usage in Agda}
 
-In this example, we define a 3-dimensional box, with $k$ as the direction of composition, missing the face at $i=0$. We need $\oftype{A}{\univ}$, the type where the composition is happening, as well as $\oftype{M}{A}$, the cap (bottom) of the box. We then define the walls as a mapping from equations on $i$ and $j$ to elements of $A$. (These are referred to as systems, or as $\mathtt{Partial}$ elements, since they define elements for some parts of the type.)
 
-We also need to ensure that the following judgements hold:
-\begin{itemize}
-	\item $\entails{j=0,k=0}{\eqtype{N_1}{M}}$
-	\item $\entails{i=1,k=0}{\eqtype{N_2}{M}}$
-	\item $\entails{j=1,k=0}{\eqtype{N_3}{M}}$
-	\item $\entails{i=1,j=0}{\eqtype{N_2}{N_1}}$
-	\item $\entails{j=1,i=1}{\eqtype{N_3}{N_2}}$
-\end{itemize}
 
-Essentially, these ensure that the faces indeed combine to form a box. The homogeneous composition is then written as e.g. $\oftype{\hcomp^k\,A\,[j=0 \mapsto N_1, i=1 \mapsto N_2, j=1 \mapsto N_3]\,M}{A}$.
+\subsection{An example}
+For example, let us consider a 3-dimensional box whose faces are of type $A$, for which we employ three indices $i, j, k : \mathbb{I}$.
+Let $k$ represent the direction of homogeneous composition, and assume that the face $M$ at $k = 0$ is the cap; that is, we shall apply homogeneous composition to this box so that we would obtain the missing face at $k = 1$.
+Moreover, let $N_1$ be the face at $j = 0$, $N_2$ the face at $i = 1$, and $N_3$ the face at $j = 1$; the face at $i = 0$ is absent.  
+Note that the missing face at $i = 0$ does not prohibit us from applying homogeneous composition to this box since the cap at $k = 0$ is present. 
+Note also that the type $A$ is invariant with respect to $k$ since otherwise we cannot apply homogeneous composition for the direction $k$. 
+
+To ensure that these faces indeed constitute a well-formed box, we need the judgements 
+\begin{align*}
+j = 0, k : \mathbb{I} &\vdash N_1 : A \ [k = 0 \mapsto M] \\
+i = 0, k : \mathbb{I} &\vdash N_2 : A \ [k = 0 \mapsto M, j = 0 \mapsto N_1] \\
+j = 1, k : \mathbb{I} &\vdash N_2 : A \ [k = 0 \mapsto M, i = 1 \mapsto N_2] 
+\end{align*}
+so that each of the intersections of the faces matches. 
+
+Then, homogeneous composition $\mathsf{hcomp}$ applied to this box is written 
+\begin{equation*}
+\oftype{\hcomp^k\,A\,[j=0 \mapsto N_1, i=1 \mapsto N_2, j=1 \mapsto N_3]\,M}{A},
+\end{equation*}
+which gives us the desired face at $k = 1$.
+
+
+
+
 
 \section{Coercion}
+Next, we introduce another operator: \emph{coercion}.
+Similarly to homogeneous composition, coercion constructs from a cap of a box the missing face. 
+\if0
+It is given by
+\begin{prooftree*}
+		\hypo{\oftype{\Gamma, \oftype{i}{\mathbb{I}}}{A}{\mathcal{U}}}
+		\hypo{\oftype{\Gamma}{a}{A(0/i)}}
+		\infer2{\oftype{\Gamma}{\mathtt{transp}^i\, A \, a}{A(1/i)}}
+\end{prooftree*}
+That is, given a face $a$ of one side $A(0/i)$ of a type $A$, coercion constructs a term $\mathsf{transp}^i \ A \ a$ of the other side $A(1/i)$.
+\fi
 
-Coercion lets us transport an element from one end of an $n$-square to the other end. Note that this is different from a homogeneous composition, since the type changes, while it stays the same in homogeneous composition. Variants of the coercion operator allow diagonals as well, or backwards. Another variant can force part of a line (or, more generally, $n$-cube) to be judgementally equal before and after it is coerced, which we will use in cubical Agda.
+Nevertheless, there are two differences between the two operators. 
+First, the underlying type of a face may change along coercion, but it is not the case for homogeneous composition (as already remarked in Sect.~\ref{HomogeneousComposition}). 
+Oh the other hand, we may specify faces other than a cap of a box for homogeneous composition (see Sect.~\ref{HomogeneousComposition}), but it is not the case for coercion. 
+Hence, coercion and homogeneous composition are somewhat complementary. 
 
-\subsection{Usage in Agda}
+Finally, there are variants of coercion that allow diagonal or backward faces to be involved.
+Another variant can force part of an $n$-cube to be judgementally equal or \emph{frozen} before and after it is coerced, which we will use in cubical Agda.
 
-In this example, we define a 2-dimensional space, with a 1-dimensional cube (i.e., a line) being transported from $j=0$ to $j=1$, with the line along $i=0$ frozen.
 
-We need the type $A$ of the space (which may depend on $j$), and the line $\oftype{M}{A[j\mapsto0]}$. Lastly, we need to ensure that $\entails{i=0}{\eqterm{A}{A[j\mapsto0]}{\univ}}$, ensuring that the freeze is true.
 
-We then write the coercion as $\oftype{\mathtt{transp}^j A (\texttildelow i) M}{A[j\mapsto1]}$. (Note that $\texttildelow i$ is used as the term that should be frozen at $1$; i.e., this represents the equation $\texttildelow i = 1$, and thus $i=0$).
+
+
+\subsection{An Example}
+For example, let us apply coercion to one face or \emph{line} of a 2-dimensional cube $A$, for which we employ two indices $i, j : \mathbb{I}$. 
+Let us assume that $A$ is invariant at $i = 0$, i.e., we have
+\begin{mathpar}
+j : \mathbb{I} \vdash A : \mathcal{U}
+\and
+i = 0 \vdash A \equiv A(0/j) : \mathcal{U}.
+\end{mathpar}
+
+We then apply coercion $\mathsf{transp}$ to a cap $M : A(0/j)$ at $j = 0$, obtaining the missing face
+\begin{mathpar}
+\mathsf{transp}^j \ A \ (\sim \! i) \ M : A(1/j)
+\end{mathpar}
+at $j = 1$, where $(\sim \! i)$ represents the constraint $\sim \! i = 1$ (equivalently $i = 0$).
+Note that the type $A$ at $i = 0$ is frozen. 
+
+
+
+
+
+
 
 \section{Heterogeneous Composition}
+By combining homogeneous composition and coercion, we may execute \emph{\bfseries heterogeneous composition} $\mathsf{comp}$.
+It works similarly to homogeneous composition, but it allows the type of the cap to differ from the missing face, which explains the terminology \emph{heterogeneous} composition.
 
-By putting together a variant of each of these, we can get heterogeneous composition. This works similarly to homogeneous composition, but allows the type of the cap to differ from the missing face.
+There are several different variants to achieve heterogeneous composition; for instance, redtt and cubical Agda use different ones.
+Nevertheless, they both accommodate all the essential features which we are concerned with such as univalence and higher inductive types.
 
-The variant used doesn't matter; redtt and cubical Agda each use different variants, but get univalence, higher inductive types, etc.
+\subsection{An Example}
+Let us recall the example of homogeneous composition given previously. 
+We may similarly apply heterogeneous composition instead of homogeneous composition except that the type $A$ can now depend on $k$. 
 
-\subsection{Usage in Agda}
+Then, because $M$ has the type $A(0/k)$, we have
+\begin{equation*}
+\mathsf{comp}^k \ A \ [j = 0 \mapsto N_1, i = 1 \mapsto N_2, j = 1 \mapsto N_3] \ M : A(1/k),
+\end{equation*}
+where note in particular that the constructed face has the type $A(1/k)$.
 
-This is essentially the same as homogeneous composition, but $A$ can depend on $k$. $M$ then has the type $A[k\mapsto0]$, while $\oftype{\mathtt{comp}^k\,A\,[...]\,M}{A[k\mapsto1]}$.
+
+
+
+
+
+
+
 
 \section{Constraints in Contexts}
+In Agda, contexts may contain a propositional formula $\varphi$, where an atomic formula is $r = 0$ or $r = 1$ such that $r$ is an element of the De Morgan algebra given by
+\begin{equation*}
+r := 0 \mid 1 \mid i \mid r_1 \wedge r_2 \mid r_1 \vee r_2 \mid \sim \! r
+\end{equation*} 
+where $i : \mathbb{I}$.
+We then write 
+\begin{equation*}
+\Gamma \vdash M \ [\varphi \mapsto N] : A
+\end{equation*}
+to mean
+\begin{equation*}
+\Gamma, \varphi \vdash M \equiv N : A.
+\end{equation*}
 
-In Agda, contexts can contain constraints formed by a boolean algebra with equations setting expressions on $\mathbb{I}$ equal to $0$ or $1$. These expressions are themselves a De Morgan algebra.
+In this manner, we may systematically specify constraints on faces. 
 
-There exists a functor from dimension expressions to constraints that sends $r$ to $r=1$. We can transform any constraint $\varphi$ to the form $r=1$ for some $r$.
+%There exists a functor from dimension expressions to constraints that sends $r$ to $r=1$. We can transform any constraint $\varphi$ to the form $r=1$ for some $r$.
 % NOTE(remexre): I'm not sure this follows from that functor existing; I think it needs to be strengthened to an equivalence? Or, really, just the functor in the opposite direction.
-For example, $(i=0)\lor(i=1) = (\texttildelow i=1)\lor(i=1) = (\texttildelow i\lor i)=1$.
+%For example, $(i=0)\lor(i=1) = (\texttildelow i=1)\lor(i=1) = (\texttildelow i\lor i)=1$.
 
-This lets us specify $\mathtt{transp}$ with $\oftype{r}{\mathbb{I}}$, rather than needing to be able to specify a constraint.
+%This lets us specify $\mathtt{transp}$ with $\oftype{r}{\mathbb{I}}$, rather than needing to be able to specify a constraint.
+
+
+
 
 \section{Kan Operators on Familiar Types}
-
+In this last section, let us see how homogeneous composition and coercion are implemented in standard type constructions such as unit-, empty-, pi-, sigma- and path-types.
 \subsection{Unit}
 
 \begin{multicols}{2}
