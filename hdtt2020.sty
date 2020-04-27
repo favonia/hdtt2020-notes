@@ -83,6 +83,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NewDocumentCommand{\ctx}{}{\Gamma}
 \NewDocumentCommand{\DD}{}{\mathcal{D}}
+\NewDocumentCommand{\II}{}{\mathcal{I}}
 \NewDocumentCommand{\emptyctx}{}{\cdot}
 \NewDocumentCommand{\entails}{gg}{\IfValueTF{#2}{\IfValueTF{#1}{#1\vdash#2}{\vdash#1}}{\vdash}}
 
@@ -127,6 +128,17 @@
   \IfValueT{#5}{\parens{#5.#6\IfValueT{#7}{; #7}}}}
 \NewDocumentCommand{\univ}{g}{\IfValueTF{#1}{\mathcal{U}_{#1}}{\mathcal{U}}}
 
+\NewDocumentCommand{\pathtype}{gggg}{%
+  \IfValueTF{#4}{\mathtt{Path}_{#1.#2}\parens{#3; #4}}{%
+    \IfValueTF{#3}{\mathtt{Path}_{\dummy.#1}\parens{#2; #3}}{%
+  \mathtt{Path}\IfValueT{#1}\parens{#1; #2}}}}
+\NewDocumentCommand{\pathlam}{gg}{\IfValueTF{#1}{\lambda#1.#2}{\lambda}}
+\NewDocumentCommand{\pathapp}{gg}{\IfValueTF{#2}{#1 \@ #2}{\@}}
+
+\NewDocumentCommand{\spheretype}{m}{\mathcal{S}^{#1}}
+\NewDocumentCommand{\spherebase}{}{\mathtt{base}}
+\NewDocumentCommand{\sphereloop}{}{\mathtt{base}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Macros for Logic / Lattice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,7 +149,7 @@
 \RenewDocumentCommand{\exp}{}{\supset}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Macros for Paths
+% Macros for Path Operations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Definition modified from github:HoTT/book.
