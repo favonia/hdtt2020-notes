@@ -1,0 +1,288 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+
+\NewDocumentCommand{\TT}{}{\mathcal{T}}
+\NewDocumentCommand{\JJ}{}{\mathcal{J}}
+\NewDocumentCommand{\UU}{}{\mathcal{U}}
+\NewDocumentCommand{\bI}{}{\mathbb{I}}
+\NewDocumentCommand{\base}{}{\ensuremath{\textnormal{base}}}
+\NewDocumentCommand{\loops}{}{\ensuremath{\textnormal{loop}}}
+\NewDocumentCommand{\circase}{gggggg}{%
+    \mathtt{elim}_{#1}%
+    \brackets{#2.#3}%
+    \parens{#4 ;#5;#6}}
+\NewDocumentCommand{\pathtypes}{ggg}{%
+    \mathtt{Path}_{#1}%
+    \parens{#2;#3}}
+% \newcommand{\baser}[1]{\ensuremath{\textnormal{base}(#1)}}
+% \newcommand{\U}{\ensuremath{\mathcal{U}}}
+% \newcommand{\wf}[1]{\ensuremath{\textnormal{well-founded}(#1)}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Daniel Luick}
+\date{March 24, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Intervals}
+Cubical type theory makes extensive use of the standard interval, $\bI$, which can be thought of as the set of points from $0$ to $1$. However, the only individual points that can be named are 0 and 1; there is no way to specify a point such as 0.3.
+
+With this in mind, paths are represented differently in cubical type theory. Instead of being its own type, a path is simply an element indexed the standard interval, like this:
+
+\[\oftype{\oftype{i}{\bI}}{M}{A}\]
+
+This also means that contexts are extended to be allowed to contain intervals. In addition, paths of dimensions other than 1 can be specified by simply having more interval variables in the context. For example, a 2D path (a square) looks like this:
+
+\[\oftype{\oftype{i}{\bI},\oftype{j}{\bI}}{M}{A}\]
+
+Using n interval variables in the context results in an n-dimensional path.
+
+An important use of intervals is substitution. For instance, for a 2 dimensional path  $\oftype{\oftype{i}{\bI},\oftype{j}{\bI}}{M}{A}$, visualizing the path as a square with i as the horizontal dimension and j as the vertical dimension, the following substitutions have the following meanings:
+
+\begin{center}
+    \begin{tabular}{cl}
+        $M\subst{1}{j}$ & top edge\\
+        $M\subst{0}{j}$ & bottom edge\\
+        $M\subst{1}{i}$ & right edge \\
+        $M\subst{0}{i}$ & left edge\\
+        $M\subst{i}{j}$ & diagonal from bottom left to upper right
+    \end{tabular}
+\end{center}
+
+The rules for paths are:
+
+\begin{prooftree*}
+    \hypo{\oftype{i}{\bI}\in\ctx}
+    \infer1{\oftype{\ctx}{i}{\bI}}
+\end{prooftree*}
+
+\begin{prooftree*}
+    \infer0{\oftype{0}{\bI}}
+\end{prooftree*}
+
+\begin{prooftree*}
+    \infer0{\oftype{1}{\bI}}
+\end{prooftree*}
+
+It is worth mentioning that $\bI$ is not a type, despite having several notational similarities.
+
+In addition, most variants of cubical type theory allow for different algebras on $\bI$. One example is allowing for the meet, join and reversal:
+
+\begin{prooftree*}
+    \hypo{\oftype{r}{\bI}}
+    \hypo{\oftype{s}{\bI}}
+    \infer2{\oftype{r\wedge s}{\bI}}
+\end{prooftree*}
+
+\begin{prooftree*}
+    \hypo{\oftype{r}{\bI}}
+    \hypo{\oftype{s}{\bI}}
+    \infer2{\oftype{r\vee s}{\bI}}
+\end{prooftree*}
+
+\[
+\begin{prooftree}
+    \hypo{\oftype{r}{\bI}}
+    \infer1{\oftype{\sim r}{\bI}}
+\end{prooftree}
+\]
+
+\section{Motivations for Cubical Type Theory}
+Id types were originally used to internalize equality of types. However, features such as function extensionality, loops and other constructors from higher inductive types, and univalence created extra paths in the Id types.
+
+To deal with this, in cubical type theory, paths are part of a type, and features such as univalence or loops are directly added to a type without first using Id types. Intervals allow for this to happen.
+
+\section{Rules for $S^1$}
+
+As a concrete example, here are 4 of the 5 rules for the circle type, $S^1$, in the
+non-cubical type theory and the cubical type theory. Implementation of Kan
+operators (which is necessary for things such as path concatenation) is also
+present in cubical type theory but will be discussed in a later lecture.
+
+\begin{enumerate}
+    \item Formation
+        \begin{itemize}
+            \item non-cubical:
+\[
+  \begin{prooftree}
+      \infer0{\oftype{S^1}{\UU}}
+  \end{prooftree}
+\]
+            \item cubical:
+\[
+  \begin{prooftree}
+      \infer0{\oftype{S^1}{\UU}}
+  \end{prooftree}
+\]
+        \end{itemize}
+
+    \item Introduction
+        \begin{itemize}
+            \item non-cubical
+\[
+    \begin{prooftree}
+        \infer0{\oftype{\base}{S^1}}
+    \end{prooftree}
+\]
+            \item cubical
+\[
+    \begin{prooftree}
+        \infer0{\oftype{\loops}{\idtype{S1}{\base}{\base}}}
+    \end{prooftree}
+\]
+        \end{itemize}
+\[
+    \begin{prooftree}
+        \hypo{\oftype{r}{\bI}}
+        \infer1{\oftype{\loops_r}{S^1}}
+    \end{prooftree}
+\]
+ 
+\[
+    \begin{prooftree}
+        \infer0{\oftype{\eqtype{\loops_0}{\base}}{S^1}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\oftype{\eqtype{\loops_1}{\base}}{S^1}}
+    \end{prooftree}
+\]
+    \item Computation
+        \begin{itemize}
+            \item non-cubical
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{N}{S^1}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}}{M_{\base}=_{\loops}^{x.C}M_{\base}}}
+        \infer1{\oftype{\circase{S1}{x}{C}{M_{\base}}{M_{\loops}}{N}}{C\subst{N}{x}}}
+    \end{prooftree}
+\]
+            \item cubical
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{N}{S^1}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{i:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{0}{i}=M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{1}{i}=M_{\base}}{C\subst{\base}{x}}}
+        \infer1{\oftype{\circase{S1}{x}{C}{M_{\base}}{i.M_{\loops}}{N}}{C\subst{N}{x}}}
+    \end{prooftree}
+\]
+        \end{itemize}
+    \item Elimination
+        \begin{itemize}
+            \item non-cubical
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{N}{S^1}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{0}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{1}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer1{\oftype{\eqtype{\circase{S1}{x}{C}{M_{\base}}{j.M_{\loops}}{\base}}{M_{base}}}{C\subst{\base}{x}}}
+    \end{prooftree}
+\]
+            \item cubical
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{N}{S^1}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{0}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{1}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{i}{\bI}}
+        \infer1{\oftype{\eqtype{\circase{S1}{x}{C}{M_{\base}}{j.M_{\loops}}{\loops_i}}{M_{\loops}\subst{i}{j}}}{C\subst{\loops_i}{x}}}
+    \end{prooftree}
+\]
+        \end{itemize}
+\end{enumerate}
+
+\section{Path Types}
+
+In cubical type theory, path types can be thought of as function types taking an interval as an argument. A path over $A$ may have an $A$ which depends on its input interval, meaning the element at one end may have a different type than the element at the other end. Path types internalize the judgement $\oftype{\oftype{i}{\bI}}{M}{A}$. The rules for the path type are:
+\begin{enumerate}
+    \item Formation
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{i}{\bI}}{A}{U}}
+        \infer[no rule]1{\oftype{N}{A\subst{0}{i}}}
+        \infer[no rule]1{\oftype{O}{A\subst{1}{i}}}
+        \infer1{\oftype{\pathtypes{i.A}{N}{O}}{\UU}}
+    \end{prooftree}
+\]
+    \item Introduction
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{i}{\bI}}{M}{A}}
+        \infer[no rule]1{\oftype{\eqtype{M\subst{0}{i}}{N}}{A\subst{0}{i}}}
+        \infer[no rule]1{\oftype{\eqtype{M\subst{1}{i}}{O}}{A\subst{1}{i}}}
+        \infer1{\oftype{\lam{i}{M}}{\pathtypes{i.A}{N}{O}}}
+    \end{prooftree}
+\]
+    \item Elimination
+\[
+    \begin{prooftree}
+        \hypo{\oftype{P}{\pathtypes{i.A}{N}{O}}}
+        \infer[no rule]1{\oftype{r}{\bI}}
+        \infer1{\oftype{P@r}{A\subst{r}{i}}}
+    \end{prooftree}
+\]
+\[
+    \begin{prooftree}
+        \hypo{\oftype{P}{\pathtypes{i.A}{N}{O}}}
+        \infer1{\oftype{\eqtype{P@0}{N}}{A\subst{0}{i}}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\oftype{P}{\pathtypes{i.A}{N}{O}}}
+        \infer1{\oftype{\eqtype{P@1}{O}}{A\subst{1}{i}}}
+    \end{prooftree}
+\]
+    \item Computation
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{i}{\bI}}{M}{A}}
+        \infer[no rule]1{\oftype{r}{\bI}}
+        \infer1{\oftype{\eqtype{\parens{\lam{i}{M}}@r}{M\subst{r}{i}}}{A\subst{r}{i}}}
+    \end{prooftree}
+\]
+    \item Uniqueness
+\[
+    \begin{prooftree}
+        \hypo{\oftype{P}{\pathtypes{i.A}{N}{O}}}
+        \infer1{\oftype{\eqtype{P}{\lam{i}{P}@i}}{\pathtypes{i.A}{N}{O}}}
+    \end{prooftree}
+\]
+\end{enumerate}
+
+\section{Function Extensionality}
+One advantage of cubical type theory is that function extensionality can easily proven, even without univalence. The sequence of steps to prove this is:
+
+\begin{prooftree*}
+    \hypo{\oftype{P}{\Pi_{\oftype{x}{A}}\pathtypes{\_.B(x)}{F(x)}{G(x)}}}
+    \infer[no rule]1{\oftype{\oftype{x}{A}}{P(x)}{\pathtypes{\_.B(x)}{F(x)}{G(x)}}}
+    \infer[no rule]1{\oftype{\oftype{x}{A},\oftype{i}{\bI}}{P(x)@i}{B(x)}}
+    \infer[no rule]1{\oftype{\oftype{i}{\bI},\oftype{x}{A}}{P(x)@i}{B(x)}}
+    \infer[no rule]1{\oftype{\oftype{i}{\bI}}{\lam{x}{P(x)@i}}{B(x)}}
+    \infer[no rule]1{\oftype{\lam{i}{\lam{x}{P(x)@i}}}{\pathtypes{\_.\Pi(x:A)B(x)}{F}{G}}}
+\end{prooftree*}
+
+The crucial step, between the third and fourth steps, is that the order of type hypotheses and interval hypotheses in the context can be safely exchanged.
+
+\section{To Be Continued}
+Previously, every type was responsible for answering five questions (formation, introduction, elimination, computation, and uniqueness). In cubical type theory, all types are required to answer a sixth question, how to compose paths in that type. This will be the focus of subsequent lectures.
+
+\end{document}
