@@ -128,13 +128,17 @@ present in cubical type theory but will be discussed in a later lecture.
         \infer0{\oftype{\base}{S^1}}
     \end{prooftree}
 \]
-            \item cubical
 \[
     \begin{prooftree}
         \infer0{\oftype{\loops}{\idtype{S1}{\base}{\base}}}
     \end{prooftree}
 \]
-        \end{itemize}
+            \item cubical
+\[
+    \begin{prooftree}
+        \infer0{\oftype{\base}{S^1}}
+    \end{prooftree}
+\]
 \[
     \begin{prooftree}
         \hypo{\oftype{r}{\bI}}
@@ -153,7 +157,8 @@ present in cubical type theory but will be discussed in a later lecture.
         \infer0{\oftype{\eqtype{\loops_1}{\base}}{S^1}}
     \end{prooftree}
 \]
-    \item Computation
+        \end{itemize}
+    \item Elimination
         \begin{itemize}
             \item non-cubical
 \[
@@ -171,25 +176,30 @@ present in cubical type theory but will be discussed in a later lecture.
         \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
         \infer[no rule]1{\oftype{N}{S^1}}
         \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
-        \infer[no rule]1{\oftype{i:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
+        \infer[no rule]1{\oftype{i:\bI}{M_{\loops}}{C\subst{\loops_i}{x}}}
         \infer[no rule]1{\oftype{M_{\loops}\subst{0}{i}=M_{\base}}{C\subst{\base}{x}}}
         \infer[no rule]1{\oftype{M_{\loops}\subst{1}{i}=M_{\base}}{C\subst{\base}{x}}}
         \infer1{\oftype{\circase{S1}{x}{C}{M_{\base}}{i.M_{\loops}}{N}}{C\subst{N}{x}}}
     \end{prooftree}
 \]
         \end{itemize}
-    \item Elimination
+    \item Computation
         \begin{itemize}
-            \item non-cubical
+            \item non-cubical (see section A.3.2 of \cite{hott-as:book})
 \[
     \begin{prooftree}
         \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
-        \infer[no rule]1{\oftype{N}{S^1}}
         \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
-        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
-        \infer[no rule]1{\oftype{M_{\loops}\subst{0}{j}=M_{\base}}{C\subst{\base}{x}}}
-        \infer[no rule]1{\oftype{M_{\loops}\subst{1}{j}=M_{\base}}{C\subst{\base}{x}}}
-        \infer1{\oftype{\eqtype{\circase{S1}{x}{C}{M_{\base}}{j.M_{\loops}}{\base}}{M_{base}}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}}{M_{\base}=_{\loops}^{x.C}M_{\base}}}
+        \infer1{\oftype{\eqtype{\circase{S1}{x}{C}{M_{\base}}{M_{\loops}}{\base}}{M_{\base}}}{C\subst{\base}{x}}}
+    \end{prooftree}
+\]
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}}{M_{\base}=_{\loops}^{x.C}M_{\base}}}
+        \infer1{\oftype{S^1\mathtt{-loopcomp}}{\mathtt{apd}_{\lam{y}{\circase{S1}{x}{C}{M_{\base}}{M_{\loops}}{y}}}(\loops)=M_{\loops}}}
     \end{prooftree}
 \]
             \item cubical
@@ -198,7 +208,18 @@ present in cubical type theory but will be discussed in a later lecture.
         \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
         \infer[no rule]1{\oftype{N}{S^1}}
         \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
-        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops}{x}}}
+        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops_j}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{0}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{M_{\loops}\subst{1}{j}=M_{\base}}{C\subst{\base}{x}}}
+        \infer1{\oftype{\eqtype{\circase{S1}{x}{C}{M_{\base}}{j.M_{\loops}}{\base}}{M_{base}}}{C\subst{\base}{x}}}
+    \end{prooftree}
+\]
+\[
+    \begin{prooftree}
+        \hypo{\oftype{\oftype{x}{S^1}}{C}{\UU}}
+        \infer[no rule]1{\oftype{N}{S^1}}
+        \infer[no rule]1{\oftype{M_{\base}}{C\subst{\base}{x}}}
+        \infer[no rule]1{\oftype{j:\bI}{M_{\loops}}{C\subst{\loops_j}{x}}}
         \infer[no rule]1{\oftype{M_{\loops}\subst{0}{j}=M_{\base}}{C\subst{\base}{x}}}
         \infer[no rule]1{\oftype{M_{\loops}\subst{1}{j}=M_{\base}}{C\subst{\base}{x}}}
         \infer[no rule]1{\oftype{i}{\bI}}
@@ -269,7 +290,7 @@ In cubical type theory, path types can be thought of as function types taking an
 \end{enumerate}
 
 \section{Function Extensionality}
-One advantage of cubical type theory is that function extensionality can easily proven, even without univalence. The sequence of steps to prove this is:
+One advantage of cubical type theory is that function extensionality can be easily proven, even without univalence. The sequence of steps to prove this is:
 
 \begin{prooftree*}
     \hypo{\oftype{P}{\Pi_{\oftype{x}{A}}\pathtypes{\_.B(x)}{F(x)}{G(x)}}}
@@ -284,5 +305,7 @@ The crucial step, between the third and fourth steps, is that the order of type 
 
 \section{To Be Continued}
 Previously, every type was responsible for answering five questions (formation, introduction, elimination, computation, and uniqueness). In cubical type theory, all types are required to answer a sixth question, how to compose paths in that type. This will be the focus of subsequent lectures.
+
+\printbibliography
 
 \end{document}
