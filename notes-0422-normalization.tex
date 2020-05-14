@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Zhuyang Wang, Bowen Wang}
+\date{April 22, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Normalization}
+Normalization is a process to choose a good representative for each equivalence class, so that the equality is easier to decide.
+
+For example, if we are testing if two unordered sequences of numbers are equal up to permutation, a natural idea is to sort the sequences first, and then check if they are literally the same. Thus, the sequence $42811$ and $21814$ are equal because they become the same sequence $11248$ after sorting. In this case, the sorted sequence is called normal form, and the sorting process is called normalization.
+
+In type theory, we want to check whether two terms are judgmentally equal. Let's use simply-typed lambda calculus with the unit type, the empty type, the pair type, and the disjoint sum type as an example.
+
+To check judgmental equality, we can first take a look at the $\beta$ rules. For the function type, the beta rule is:
+\[
+  \app{\parens{\lam{x}{M}}}{N} \equiv M\subst{N}{x}
+\]
+To identify these two terms, it seems reasonable to pick the left-to-right direction, because it is generally impossible to convert $M\subst{N}{x}$ back to $\app{\parens{\lam{x}{M}}}{N}$.
+
+Similarly, for the pair type, we have $\pairfst{\pair{M}{N}} \equiv M$ and $\pairsnd{\pair{M}{N}} \equiv N$. For the disjoint sum type, the beta rules are $\sumcase{x}{M}{y}{N}{\suminl{O}} \equiv M\subst{O}{x}$ and $\sumcase{x}{M}{y}{N}{\suminr{O}} \equiv N\subst{O}{y}$.
+
+The direction we picked is actually the evaluation direction. It is reasonable because evaluation is generally irreversible, just like the sorting process is irreversible. So the first step of normalization is to run the term using the $\beta$ rules recursively until we get stuck.
+
+Next, we have to consider the $\eta$ rules (uniqueness rules). For the function, we have the $\eta$ rule:
+\[
+  F \equiv \lam{x}{\app*{F}{x}}
+\]
+In both sides we cannot apply $\beta$ rules further so we get stuck, but these two terms still needs to be identified. One possible solution is to $\eta$ expand the term. If a value is of the function type, we should always write it as a $\lambda$ abstraction. Similarly, for a value of the pair type, write it as a pair of two components. For a value of the unit type, just use $\unitelem$.
+
+These two steps lead to a powerful technique called normalization by evaluation. The first step is called evaluation: using $\beta$ rules until we get stuck. And the second step is called reification: using $\eta$ rules to expand the term.
+
+\section{Optimizations}
+
+\subsection{Function Normalization}
+If a straightforward normalization strategy is used, some parts of an expression might be normalized multiple times. For example, to normalize the expression $\app{\parens{\lam{x}{M}}}{N}$, we first normalize $M$ to $M'$, and $N$ to $N'$. After that, we will normalize $M'\subst{N'}{x}$. In this case, the expression $M$ is normalized twice.
+
+One possible optimization is to delay the normalization of $M$. When we evaluate a term to the form $\lam{x}{M}$, the inner part is not normalized immediately, but it is rather put into a separate domain. The operation from the terms to the domain is called ``evaluate'', and the other direction is called ``reify''. These two operations are intertwined, because when $\lam{x}{M}$ is reified, $M$ should be further evaluated.
+
+\subsection{De Bruijn Index and De Bruijn Level}
+The term equality we were talking about is under $\alpha$-equivalence, that is, two terms are equal if they can be syntactically equal after appropriate renamings. For example, $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ and $\lam{y}{\app{y}{\parens{\lam{x}{\app{y}{x}}}}}$ are equal. But in practice, it is surprisingly tricky to handle the renaming and substitution correctly.
+
+One way to handle the variable names is using De Bruijn index, which uses natural numbers to name variables. A variable name is represented by the number of ``$\lambda$''s between its occurrence and its binding site. For example, both $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ and $\lam{y}{\app{y}{\parens{\lam{x}{\app{y}{x}}}}}$ are represented by the same term $\lam{}{\app{0}{\parens{\lam{}{\app{1}{0}}}}}$. Notice that a variable can have different names at different places, like the first 0 and 1 both refer to the variable $x$ in
+$\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$.
+
+Using De Bruijn index, the equality of normal forms is just syntactical equality. However, during the evaluation inside the functions, we still have to handle variable renamings. Whenever we move into another layer of $\lambda$, we need to increment all the variable names in the context by 1. This can be avoided by using De Bruijn level in the domain.
+
+De Bruijn level is roughly the opposite of De Bruijn index. The variable name is represented by the number of ``$\lambda$''s before its binding site. So the term $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ is represented by $\lam{}{\app{0}{\parens{\lam{}{\app{0}{1}}}}}$. Using De Bruijn level, the variable name is like a constant value, so we don't have to shift the variable names in the context. It is also easy to convert between De Bruijn index and level. If a variable appears in the $n$th $\lambda$, then the sum of the index and the level should be $(n-1)$.
+
+Therefore, the variable naming problem can be solved by using De Bruijn index for the terms, and using De Bruijn level for the domain.
+
+\section{Cubical Type Theory}
+To apply normalization in cubical type theory, we must make normalization work for extra equalities specified by boundaries.
+
+For example, suppose that we have a path $p$ from $M$ to $N$. In this case, we want to reduce $p$ to $0$ at $M$ and $p$ to $1$ at $N$.
+%Equations here%
+\[
+  \eqterm{\hdots, \pathtype{\_}{A}{M}{N}}{p@0}{M}{A}
+\]
+\[
+  \eqterm{\hdots, \pathtype{\_}{A}{M}{N}}{p@1}{N}{A}
+\]
+
+The problem here is that this reduction is neither a $\beta$-reduction nor an $\eta$-expansion. Another problem is that when returning $p@i$ for some dimensional variable will usually stuck. But if there is a constraint $i=0$ or $i=1$ in the context, it should reduce to $M$ or $N$ accordingly.
+\[
+\oftype{\hdots, \pathtype{\_}{A}{M}{N}}{p@i}{A}
+\]
+\[
+\eqterm{\hdots, \pathtype{\_}{A}{M}{N}, i=0}{p@i}{M}{A}
+\]
+\[
+\eqterm{\hdots, \pathtype{\_}{A}{M}{N}, i=1}{p@i}{N}{A}
+\]
+
+Another example in cubical type theory is the loop constructor in the circle type. In this case, loop $i$ is usually a value unless there is a constraint $i=0$ or $i=1$.
+%Equations of loops here%
+\[
+\oftype{\hdots}{\sphereloop_i}{\spheretype{1}}
+\]
+\[
+\eqterm{\hdots, i=0}{\sphereloop_i}{\spherebase}{\spheretype{1}}
+\]
+\[
+\eqterm{\hdots, i=1}{\sphereloop_i}{\spherebase}{\spheretype{1}}
+\]
+
+How to combine normalization by evaluation and rules in cubical type theory is still a ongoing research effort.
+\end{document}
