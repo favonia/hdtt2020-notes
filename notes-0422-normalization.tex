@@ -32,7 +32,7 @@ Next, we have to consider the $\eta$ rules (uniqueness rules). For the function,
 \[
   F \equiv \lam{x}{\app*{F}{x}}
 \]
-In both sides we cannot apply $\beta$ rules further so we get stuck, but these two terms still needs to be identified. One possible solution is to $\eta$ expand the term. If a value is of the function type, we should always write it as a $\lambda$ abstraction. Similarly, for a value of the pair type, write it as a pair of two components. For a value of the unit type, just use $\unitelem$.
+It is possible that we get stuck on both sides because we cannot apply any $\beta$ rules further, but due to the $\eta$ rule, these two term should also be identified. One possible solution is to $\eta$ expand the term. If a value is of the function type, we should always write it as a $\lambda$ abstraction. Similarly, for a value of the pair type, write it as a pair of two components. For a value of the unit type, just use $\unitelem$.
 
 These two steps lead to a powerful technique called normalization by evaluation. The first step is called evaluation: using $\beta$ rules until we get stuck. And the second step is called reification: using $\eta$ rules to expand the term.
 
@@ -51,7 +51,7 @@ $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$.
 
 Using De Bruijn index, the equality of normal forms is just syntactical equality. However, during the evaluation inside the functions, we still have to handle variable renamings. Whenever we move into another layer of $\lambda$, we need to increment all the variable names in the context by 1. This can be avoided by using De Bruijn level in the domain.
 
-De Bruijn level is roughly the opposite of De Bruijn index. The variable name is represented by the number of ``$\lambda$''s before its binding site. So the term $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ is represented by $\lam{}{\app{0}{\parens{\lam{}{\app{0}{1}}}}}$. Using De Bruijn level, the variable name is like a constant value, so we don't have to shift the variable names in the context. It is also easy to convert between De Bruijn index and level. If a variable appears in the $n$th $\lambda$, then the sum of the index and the level should be $(n-1)$.
+De Bruijn level is roughly the opposite of De Bruijn index. The variable name is represented by the number of ``$\lambda$''s before its binding site. So the term $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ is represented by $\lam{}{\app{0}{\parens{\lam{}{\app{0}{1}}}}}$. And it is also easy to convert between De Bruijn index and level. If a variable appears in the $n$th $\lambda$, then the sum of the index and the level should be $(n-1)$. During reification, that is, from the domain to the term, we can avoid shifting by using De Bruijn level.
 
 Therefore, the variable naming problem can be solved by using De Bruijn index for the terms, and using De Bruijn level for the domain.
 
@@ -67,7 +67,7 @@ For example, suppose that we have a path $p$ from $M$ to $N$. In this case, we w
   \eqterm{\hdots, \pathtype{\_}{A}{M}{N}}{p@1}{N}{A}
 \]
 
-The problem here is that this reduction is neither a $\beta$-reduction nor an $\eta$-expansion. Another problem is that when returning $p@i$ for some dimensional variable will usually stuck. But if there is a constraint $i=0$ or $i=1$ in the context, it should reduce to $M$ or $N$ accordingly.
+The problem here is that this reduction is neither a $\beta$-reduction nor an $\eta$-expansion. Another problem is that when returning $p@i$ for some dimensional variable will usually get stuck. But if there is a constraint $i=0$ or $i=1$ in the context, it should reduce to $M$ or $N$ accordingly.
 \[
 \oftype{\hdots, \pathtype{\_}{A}{M}{N}}{p@i}{A}
 \]
@@ -90,5 +90,5 @@ Another example in cubical type theory is the loop constructor in the circle typ
 \eqterm{\hdots, i=1}{\sphereloop_i}{\spherebase}{\spheretype{1}}
 \]
 
-How to combine normalization by evaluation and rules in cubical type theory is still a ongoing research effort.
+How to combine normalization by evaluation and rules in cubical type theory is still an ongoing research effort.
 \end{document}
