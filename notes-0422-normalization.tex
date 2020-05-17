@@ -34,7 +34,7 @@ Next, we have to consider the $\eta$ rules (uniqueness rules). For the function,
 \]
 It is possible that we get stuck on both sides because we cannot apply any $\beta$ rules further, but due to the $\eta$ rule, these two term should also be identified. One possible solution is to $\eta$ expand the term. If a value is of the function type, we should always write it as a $\lambda$ abstraction. Similarly, for a value of the pair type, write it as a pair of two components. For a value of the unit type, just use $\unitelem$.
 
-These two steps lead to a powerful technique called normalization by evaluation. The first step is called evaluation: using $\beta$ rules until we get stuck. And the second step is called reification: using $\eta$ rules to expand the term.
+These two steps lead to a powerful technique called normalization by evaluation (abbreviated as NbE). The first step is called evaluation: using $\beta$ rules until we get stuck. And the second step is called reification: using $\eta$ rules to expand the term.
 
 \section{Optimizations}
 
@@ -54,6 +54,48 @@ Using De Bruijn index, the equality of normal forms is just syntactical equality
 De Bruijn level is roughly the opposite of De Bruijn index. The variable name is represented by the number of ``$\lambda$''s before its binding site. So the term $\lam{x}{\app{x}{\parens{\lam{y}{\app{x}{y}}}}}$ is represented by $\lam{}{\app{0}{\parens{\lam{}{\app{0}{1}}}}}$. And it is also easy to convert between De Bruijn index and level. If a variable appears in the $n$th $\lambda$, then the sum of the index and the level should be $(n-1)$. During reification, that is, from the domain to the term, we can avoid shifting by using De Bruijn level.
 
 Therefore, the variable naming problem can be solved by using De Bruijn index for the terms, and using De Bruijn level for the domain.
+
+\section{A Simple NbE Implementation}
+In this section, we are going to present an implementation of the normalization by evaluation for simply typed lambda calculus, with the optimizations mentioned in the previous section. We will use Haskell to illustrate the idea.
+
+First we define the terms. Note the variable here is represented by De Bruijn index.
+
+\begin{verbatim}
+data Tm = Var Int | App Tm Tm | Lam Tm
+\end{verbatim}
+
+Then we define the domain. Here the variable is represented by De Bruijn level, and the function is represented by a Haskell function.
+
+\begin{verbatim}
+data Val = VVar Int | VApp Val Val | VLam (Val -> Val)
+\end{verbatim}
+
+Now we can implement the evaluation from the term to the domain. This function also takes a list of values as the context. If the term is a variable, we simply look it up in the context. If it is a $\lambda$ term, it evaluates to a function in the domain. We can see that the evaluation of the function body is delayed. If the term is a function application, we first evaluate both subterms recursively. Then if the first subterm evaluates to a function value, which means the $\beta$ rule can be applied, we can proceed the function application. Otherwise we get stuck, and it should return a stuck application value.
+
+\begin{verbatim}
+eval :: [Val] -> Tm -> Val
+eval env = \case
+  Var x -> env !! x
+  Lam t -> VLam (\u -> eval (u:env) t)
+  App f x -> case (eval env f, eval env x) of
+    (VLam f, x) -> f x
+    (f, x) -> VApp f x
+\end{verbatim}
+
+After evaluation follows the reification, which converts the domain back to the term. The additional argument is the number of variables in the context. If the value is a variable, which is represented by De Bruijn level, we should convert it to De Bruijn index. If it is a function application, we just reify recursively. If it is a function, we should continue the delayed evaluation \verb=f= by feeding the argument \verb=VVar n=, and then reify the result.
+\begin{verbatim}
+reify :: Int -> Val -> Tm
+reify n = \case
+  VVar x -> Var (n-x-1)
+  VApp f x -> App (reify n f) (reify n x)
+  VLam f -> Lam (reify (n+1) (f (VVar n)))
+\end{verbatim}
+
+Finally the normalization can be defined using evaluation and reification.
+\begin{verbatim}
+normalize :: Tm -> Tm
+normalize = reify 0 . eval []
+\end{verbatim}
 
 \section{Cubical Type Theory}
 To apply normalization in cubical type theory, we must make normalization work for extra equalities specified by boundaries.
