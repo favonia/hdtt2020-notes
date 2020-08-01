@@ -1,0 +1,303 @@
+\documentclass[11pt]{article}
+\usepackage{hdtt2020}
+\usepackage{newpxmath}
+\usepackage{newpxtext}
+\usepackage{multicol}
+%\usepackage{bussproof}
+
+\NewDocumentCommand{\circletype}{}{\mathtt{circle}}
+\NewDocumentCommand{\circleloop}{}{\mathtt{loop}}
+\NewDocumentCommand{\hcomp}{}{\mathtt{hcomp}}
+\NewDocumentCommand{\pathconcat}{mm}{\idconcat{#1}{#2}}
+\NewDocumentCommand{\pathrefl}{g}{\mathtt{refl}\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\pathtype}{ggg}{\IfValueTF{#3}{\mathtt{Path}_{#1}\parens{#2; #3}}{\IfValueTF{#1}{\mathtt{Path}\parens{#1; #2}}{\mathtt{Path}}}}
+
+\title{CSCI 8980 Higher-Dimensional Type Theory\\ Lecture Notes}
+\author{Nathan Ringo, Norihiro Yamada}
+\date{April 7, 2020} % Also some Apr1 content for context
+
+\begin{document}
+\maketitle
+
+In this lecture note, we shall first introduce two operators (on terms) equipped on every type, called \emph{homogeneous composition} and \emph{coercion}, which together ensure that paths can be composed in every type. 
+We shall then see how these two operators are defined along the basic type constructions. 
+
+
+\section{Homogeneous Composition}
+\label{HomogeneousComposition}
+\emph{\bfseries Homogeneous composition} is concerned with an $n$-cube ($n \in \mathbb{N}$) with a missing term or \emph{\bfseries face}; we call such an $n$-cube a \emph{\bfseries box}, and the face of a box that is on the side opposite to the missing face the \emph{\bfseries cap}. 
+Homogenous composition is then what gives us the missing face of a box from the cap.
+
+%To make homogeneous composition useful in type theory, we extend it to boxes with multiple missing faces. 
+Let us remark that as long as the cap of a box is present we can apply homogeneous composition to the box \emph{even if the other faces are absent}.
+Also, to apply homogeneous composition, the faces of a box must share the \emph{same} type; this point explains the terminology \emph{homogeneous} composition. 
+
+There is an important condition: Homogenous composition must commute with substitution. 
+It is just an instance of the general principle of type theory that every constructions must commute with substitution. 
+%For example, if you compose a 3-box, and take its diagonal, the result should be judgementally equal to taking the diagonal of the box, and composing the 2-dimensional box.
+
+Finally, there is a variant of homogeneous composition that allows \emph{diagonal faces}.
+However, we do not use this variant in cubical Agda.
+
+
+
+
+
+\subsection{An example}
+For example, let us consider a 3-dimensional box whose faces are of type $A$, for which we employ three indices $i, j, k : \mathbb{I}$.
+Let $k$ represent the direction of homogeneous composition, and assume that the face $M$ at $k = 0$ is the cap; that is, we shall apply homogeneous composition to this box so that we would obtain the missing face at $k = 1$.
+Moreover, let $N_1$ be the face at $j = 0$, $N_2$ the face at $i = 1$, and $N_3$ the face at $j = 1$; the face at $i = 0$ is absent.  
+Note that the missing face at $i = 0$ does not prohibit us from applying homogeneous composition to this box since the cap at $k = 0$ is present. 
+Note also that the type $A$ is invariant with respect to $k$ since otherwise we cannot apply homogeneous composition for the direction $k$. 
+
+To ensure that these faces indeed constitute a well-formed box, we need the judgements 
+\begin{align*}
+j = 0, k : \mathbb{I} &\vdash N_1 : A \ [k = 0 \mapsto M] \\
+i = 0, k : \mathbb{I} &\vdash N_2 : A \ [k = 0 \mapsto M, j = 0 \mapsto N_1] \\
+j = 1, k : \mathbb{I} &\vdash N_2 : A \ [k = 0 \mapsto M, i = 1 \mapsto N_2] 
+\end{align*}
+so that each of the intersections of the faces matches. 
+
+Then, homogeneous composition $\mathsf{hcomp}$ applied to this box is written 
+\begin{equation*}
+\oftype{\hcomp^k\,A\,[j=0 \mapsto N_1, i=1 \mapsto N_2, j=1 \mapsto N_3]\,M}{A},
+\end{equation*}
+which gives us the desired face at $k = 1$.
+
+
+
+
+
+\section{Coercion}
+Next, we introduce another operator: \emph{coercion}.
+Similarly to homogeneous composition, coercion constructs from a cap of a box the missing face. 
+\if0
+It is given by
+\begin{prooftree*}
+		\hypo{\oftype{\Gamma, \oftype{i}{\mathbb{I}}}{A}{\mathcal{U}}}
+		\hypo{\oftype{\Gamma}{a}{A(0/i)}}
+		\infer2{\oftype{\Gamma}{\mathtt{transp}^i\, A \, a}{A(1/i)}}
+\end{prooftree*}
+That is, given a face $a$ of one side $A(0/i)$ of a type $A$, coercion constructs a term $\mathsf{transp}^i \ A \ a$ of the other side $A(1/i)$.
+\fi
+
+Nevertheless, there are two differences between the two operators. 
+First, the underlying type of a face may change along coercion, but it is not the case for homogeneous composition (as already remarked in Sect.~\ref{HomogeneousComposition}). 
+Oh the other hand, we may specify faces other than a cap of a box for homogeneous composition (see Sect.~\ref{HomogeneousComposition}), but it is not the case for coercion. 
+Hence, coercion and homogeneous composition are somewhat complementary. 
+
+Finally, there are variants of coercion that allow diagonal or backward faces to be involved.
+Another variant can force part of an $n$-cube to be judgementally equal or \emph{frozen} before and after it is coerced, which we will use in cubical Agda.
+
+
+
+
+
+\subsection{An Example}
+For example, let us apply coercion to one face or \emph{line} of a 2-dimensional cube $A$, for which we employ two indices $i, j : \mathbb{I}$. 
+Let us assume that $A$ is invariant at $i = 0$, i.e., we have
+\begin{mathpar}
+j : \mathbb{I} \vdash A : \mathcal{U}
+\and
+i = 0 \vdash A \equiv A(0/j) : \mathcal{U}.
+\end{mathpar}
+
+We then apply coercion $\mathsf{transp}$ to a cap $M : A(0/j)$ at $j = 0$, obtaining the missing face
+\begin{mathpar}
+\mathsf{transp}^j \ A \ (\sim \! i) \ M : A(1/j)
+\end{mathpar}
+at $j = 1$, where $(\sim \! i)$ represents the constraint $\sim \! i = 1$ (equivalently $i = 0$).
+Note that the type $A$ at $i = 0$ is frozen. 
+
+
+
+
+
+
+
+\section{Heterogeneous Composition}
+By combining homogeneous composition and coercion, we may execute \emph{\bfseries heterogeneous composition} $\mathsf{comp}$.
+It works similarly to homogeneous composition, but it allows the type of the cap to differ from the missing face, which explains the terminology \emph{heterogeneous} composition.
+
+There are several different variants to achieve heterogeneous composition; for instance, redtt and cubical Agda use different ones.
+Nevertheless, they both accommodate all the essential features which we are concerned with such as univalence and higher inductive types.
+
+\subsection{An Example}
+Let us recall the example of homogeneous composition given previously. 
+We may similarly apply heterogeneous composition instead of homogeneous composition except that the type $A$ can now depend on $k$. 
+
+Then, because $M$ has the type $A(0/k)$, we have
+\begin{equation*}
+\mathsf{comp}^k \ A \ [j = 0 \mapsto N_1, i = 1 \mapsto N_2, j = 1 \mapsto N_3] \ M : A(1/k),
+\end{equation*}
+where note in particular that the constructed face has the type $A(1/k)$.
+
+
+
+
+
+
+
+
+
+\section{Constraints in Contexts}
+In Agda, contexts may contain a propositional formula $\varphi$, where an atomic formula is $r = 0$ or $r = 1$ such that $r$ is an element of the De Morgan algebra given by
+\begin{equation*}
+r := 0 \mid 1 \mid i \mid r_1 \wedge r_2 \mid r_1 \vee r_2 \mid \sim \! r
+\end{equation*} 
+where $i : \mathbb{I}$.
+We then write 
+\begin{equation*}
+\Gamma \vdash M \ [\varphi \mapsto N] : A
+\end{equation*}
+to mean
+\begin{equation*}
+\Gamma, \varphi \vdash M \equiv N : A.
+\end{equation*}
+
+In this manner, we may systematically specify constraints on faces. 
+
+%There exists a functor from dimension expressions to constraints that sends $r$ to $r=1$. We can transform any constraint $\varphi$ to the form $r=1$ for some $r$.
+% NOTE(remexre): I'm not sure this follows from that functor existing; I think it needs to be strengthened to an equivalence? Or, really, just the functor in the opposite direction.
+%For example, $(i=0)\lor(i=1) = (\texttildelow i=1)\lor(i=1) = (\texttildelow i\lor i)=1$.
+
+%This lets us specify $\mathtt{transp}$ with $\oftype{r}{\mathbb{I}}$, rather than needing to be able to specify a constraint.
+
+
+
+
+\section{Kan Operators on Familiar Types}
+In this last section, let us see how homogeneous composition and coercion are implemented in standard type constructions such as unit-, empty-, pi-, sigma- and path-types.
+\subsection{Unit}
+
+\begin{multicols}{2}
+	\begin{prooftree*}
+		\hypo{\oftype{M}{\unittype}}
+		\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\unittype}}
+		\infer2{\eqterm{\mathtt{hcomp}^i\,\unittype\,[\varphi\mapsto N]\,M}{M}{\unittype}}
+	\end{prooftree*}
+
+	\begin{prooftree*}
+		\hypo{\oftype{M}{\unittype}}
+		\hypo{\oftype{r}{\mathbb{I}}}
+		\infer2{\eqterm{\mathtt{transp}^i\,\unittype\,r\,M}{M}{\unittype}}
+	\end{prooftree*}
+\end{multicols}
+
+Because of the unit type's simple structure, nothing particularly interesting can happen here.
+
+\subsection{Empty}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\unittype}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\unittype}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\unittype\,[\varphi\mapsto N]\,M}
+	               {M}
+	               {\unittype}}
+\end{prooftree*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\unittype}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\unittype\,r\,M}
+	               {M}
+	               {\unittype}}
+\end{prooftree*}
+
+\subsection{Pi}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\dfuntype{x}{A}{B}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\parens{\dfuntype{x}{A}{B}}\,[\varphi\mapsto N]\,M}
+	               {\lam{x}[A]{\mathtt{hcomp}^i\,B\,[\varphi\mapsto\app{N}{x}]\,\parens{\app{M}{x}}}}
+	               {\dfuntype{x}{A}{B}}}
+\end{prooftree*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dfuntype{x}{A}{B}}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\parens{\dfuntype{x}{A}{B}}\,r\,M}
+	               {\lam{x}[A]{\mathtt{transp}^i\,B[x \mapsto \text{\texttt{transp-fill}}^{\texttildelow i}\,A\,r\,x]\,r\,\parens{\app{M}{\parens{\text{\texttt{transp-fill}}^1\,A\,r\,x}}}}}
+	               {\dfuntype{x}{A}{B}}}
+\end{prooftree*}
+
+The intuition here essentially follows from function extensionality: we just need the term to have identical input-output behavior. It's therefore perfectly fine to just ``push the operator in,'' instead operating on $B$.
+
+\subsection{Sigma}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{N}{\dpairtype{x}{A}{B}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\parens{\dpairtype{x}{A}{B}}\,[\varphi\mapsto N]\,M}
+	               {\pair{\mathtt{compFst}}{\mathtt{compSnd}}}
+	               {\dpairtype{x}{A}{B}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{compFst} & \defeq \mathtt{hcomp}^i\,A\,[\varphi\mapsto\pairfst{N}]\,\parens{\pairfst{M}} \\
+	\mathtt{compSnd} & \defeq \mathtt{comp}^i\,B\,[\varphi\mapsto\pairsnd{N}, x\mapsto\mathtt{filler}^i]\,\parens{\pairsnd{M}} \\
+	\mathtt{filler}^i & \defeq \mathtt{hfill}^i\,A\,[\varphi\mapsto\pairfst{N}]\,\parens{\pairfst{M}}
+\end{align*}
+
+\begin{prooftree*}
+	\hypo{\oftype{M}{\dpairtype{x}{A}{B}}}
+	\hypo{\oftype{r}{\mathbb{I}}}
+	\infer2{\eqterm{\mathtt{transp}^i\,\parens{\dpairtype{x}{A}{B}}\,\varphi\,M}
+	               {\pair{\mathtt{transpFst}}{\mathtt{transpSnd}}}
+	               {\dpairtype{x}{A}{B}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{transpFst} & \defeq \mathtt{transp}^i\,A\,\varphi\,\parens{\pairfst{M}} \\
+	\mathtt{transpSnd} & \defeq \mathtt{transp}^i\,\parens{B[x\mapsto\mathtt{filler}^i]}\,\varphi\,\parens{\pairsnd{M}} \\
+	\mathtt{filler}^i & \defeq \text{\texttt{transp-fill}}^i\,A\,\varphi\,\parens{\pairfst{M}}
+\end{align*}
+
+\subsection{Paths}
+
+\begin{prooftree*}
+	\hypo{\oftype{P}{\pathtype{j.A}{M}{N}}}
+	\hypo{\oftype{\varphi,\oftype{i}{\mathbb{I}}}{Q}{\pathtype{j.A}{M}{N}}}
+	\infer2{\eqterm{\mathtt{hcomp}^i\,\pathtype{j.A}{M}{N}\,[\varphi\mapsto Q]\,P}
+	               {\lam{j}{\mathtt{body}}}
+	               {\pathtype{j.A}{M}{N}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{body} & \defeq \mathtt{hcomp}^i\,A\,[\varphi\mapsto Q@j, j=0\mapsto M, j=1\mapsto N]\,\parens{P@j}
+\end{align*}
+
+\begin{prooftree*}
+	\hypo{\oftype{P}{\pathtype{j.A}{M}{N}}}
+	\infer1{\eqterm{\mathtt{transp}^i\,\parens{\pathtype{j.A}{M}{N}}\,\varphi\,P}
+	               {\lam{j}{\mathtt{body}}}
+	               {\pathtype{j.A}{M}{N}}}
+\end{prooftree*}
+
+where
+
+\begin{align*}
+	\mathtt{body} & \defeq \mathtt{comp}^i\,[\varphi\mapsto P@j, j=0\mapsto M, j=1\mapsto N]\,\parens{P@j}
+\end{align*}
+
+\subsection{Positive Types}
+
+Coercion simply ``just works'' for inductive types:
+
+\begin{prooftree*}
+	\hypo{A\,\text{is an inductive type}}
+	\hypo{\oftype{M}{A}}
+	\infer2{\eqterm{\mathtt{transp}^i\,A\,\varphi\,M}{M}{A}}
+\end{prooftree*}
+
+Homogeneous composition, on the other hand, requires a bit of a trick; since $N$ might not be constant (i.e., $N[i\mapsto0]\equiv N[i\mapsto1]$ might not hold). Here, $\mathtt{hcomp}$ adds additional values to the type; since type declarations only define an inductive type that's generated by a certain description, this is acceptable. Furthermore, the new values commute with elimination, which makes these new values aren't really ``stuck terms.''
+
+\printbibliography
+\end{document}
