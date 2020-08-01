@@ -83,6 +83,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NewDocumentCommand{\ctx}{}{\Gamma}
 \NewDocumentCommand{\DD}{}{\mathcal{D}}
+\NewDocumentCommand{\II}{}{\mathcal{I}}
 \NewDocumentCommand{\emptyctx}{}{\cdot}
 \NewDocumentCommand{\entails}{gg}{\IfValueTF{#2}{\IfValueTF{#1}{#1\vdash#2}{\vdash#1}}{\vdash}}
 
@@ -97,6 +98,7 @@
 
 \NewDocumentCommand{\unittype}{}{\top}
 \NewDocumentCommand{\unitelem}{}{\diamond}
+\NewDocumentCommand{\booltype}{}{\varmathbb{2}}
 \NewDocumentCommand{\dpairtype}{sggg}{\IfValueTF{#2}{\sum\limits_{\IfBooleanTF{#1}{\parens{#2{:}#3}}{#2{:}#3}}#4}{\sum}}
 % \dpairtype*{x}{A}{B} adds the parentheses around 'x:A'
 \NewDocumentCommand{\pairtype}{gg}{\IfValueTF{#1}{#1\times#2}{\mathbin{\times}}}
@@ -116,7 +118,7 @@
 % \dfuntype*{x}{A}{B} adds the parentheses around 'x:A'
 \NewDocumentCommand{\funtype}{gg}{\IfValueTF{#1}{#1\to#2}{\mathbin{\to}}}
 \NewDocumentCommand{\lam}{gog}{\IfValueTF{#1}{\IfValueTF{#2}{\lambda\parens{#1{:}#2}.#3}{\lambda#1.#3}}{\lambda}}
-\NewDocumentCommand{\app}{mm}{#1\;#2}
+\NewDocumentCommand{\app}{smm}{\IfBooleanTF{#1}{#2\parens{#3}}{#2\;#3}}
 \NewDocumentCommand{\nattype}{}{\varmathbb{N}}
 \NewDocumentCommand{\idtype}{ggg}{\IfValueTF{#3}{\mathtt{Id}_{#1}\parens{#2; #3}}{\IfValueTF{#1}{\mathtt{Id}\parens{#1; #2}}{\mathtt{Id}}}}
 \NewDocumentCommand{\idrefl}{g}{\mathtt{refl}\IfValueT{#1}{\parens{#1}}}
@@ -124,6 +126,18 @@
   \mathtt{J}%
   \IfValueT{#1}{\brackets{#1\IfValueT{#2}{.#2\IfValueT{#3}{.#3\IfValueT{#4}{.#4}}}}}%
   \IfValueT{#5}{\parens{#5.#6\IfValueT{#7}{; #7}}}}
+\NewDocumentCommand{\univ}{g}{\IfValueTF{#1}{\mathcal{U}_{#1}}{\mathcal{U}}}
+
+\NewDocumentCommand{\pathtype}{gggg}{%
+  \IfValueTF{#4}{\mathtt{Path}_{#1.#2}\parens{#3; #4}}{%
+    \IfValueTF{#3}{\mathtt{Path}_{\dummy.#1}\parens{#2; #3}}{%
+  \mathtt{Path}\IfValueT{#1}\parens{#1; #2}}}}
+\NewDocumentCommand{\pathlam}{gg}{\IfValueTF{#1}{\lambda#1.#2}{\lambda}}
+\NewDocumentCommand{\pathapp}{gg}{\IfValueTF{#2}{#1 \@ #2}{\@}}
+
+\NewDocumentCommand{\spheretype}{m}{\mathcal{S}^{#1}}
+\NewDocumentCommand{\spherebase}{}{\mathtt{base}}
+\NewDocumentCommand{\sphereloop}{}{\mathtt{loop}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Macros for Logic / Lattice
@@ -135,7 +149,7 @@
 \RenewDocumentCommand{\exp}{}{\supset}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Macros for Paths
+% Macros for Path Operations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Definition modified from github:HoTT/book.
@@ -161,6 +175,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \NewDocumentCommand{\isset}{g}{\mathtt{is\mhyphen{}set}\IfValueT{#1}{\parens{#1}}}
+\NewDocumentCommand{\haslevel}{gg}{\IfValueTF{#1}{\mathtt{has\mhyphen{}level}_{#1}}{\mathtt{has\mhyphen{}level}}\IfValueT{#2}{\parens{#2}}}
+\NewDocumentCommand{\ntypes}{m}{#1\mathtt{\mhyphen{}types}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The End
