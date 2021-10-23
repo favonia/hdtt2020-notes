@@ -1,4 +1,10 @@
-These are lecture notes of [Higher-Dimensional Type Theory (CSCI 8980) in 2020 Spring](https://favonia.org/courses/hdtt2020/), collectively done by the students and Favonia.
+# Status: Archived
+
+Favonia: This repository still requires lots of work but I do not have time to maintain it now. In particular, many lecture notes are in unmerged pull requests but they never received enough attention after the course ended. It is possible that I would have to take over those pull requests and finish the revisions when I have time. Until then, this repository is archived.
+
+# Overview
+
+These are some lecture notes of [Higher-Dimensional Type Theory (CSCI 8980) in 2020 Spring](https://favonia.org/courses/hdtt2020/), collectively done by the students and Favonia.
 
 - `notes-0121-introduction`: Introduction to Type Theory (2020/01/21, 2020/01/28) by Favonia
 - `notes-0204-dependency`: Dependent Types (2020/02/04) by Bowen Wang and Zhuyang Wang
